@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="VarinsEdu.Api/VarinsEdu.Api.csproj" />
+  <Project Path="VarinsEdu.Domain/VarinsEdu.Domain.csproj" />
+  <Project Path="VarinsEdu.Infrastructure/VarinsEdu.Infrastructure.csproj" />
+</Solution>

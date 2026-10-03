@@ -1,0 +1,6 @@
+@VarinsEdu.Api_HostAddress = http://localhost:5075
+
+GET {{VarinsEdu.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
