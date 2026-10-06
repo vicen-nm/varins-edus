@@ -9,4 +9,7 @@ public class Institution
     public string Locale { get; set; } = "es-CR";
     public bool IsActive { get; set; } = true;
     public DateTimeOffset CreatedAt { get; set; }
+
+    public InstitutionSettings? Settings { get; set; }
+    public ICollection<InstitutionModule> Modules { get; set; } = new List<InstitutionModule>();
 }
