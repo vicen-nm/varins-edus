@@ -2,6 +2,7 @@ using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using VarinsEdu.Domain.Common;
 using VarinsEdu.Domain.Entities;
+using VarinsEdu.Domain.Exceptions;
 
 namespace VarinsEdu.Infrastructure.Persistence;
 
@@ -77,5 +78,119 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentTenant
     {
         modelBuilder.Entity<TEntity>().HasQueryFilter(e =>
             IgnoreTenantFilter || e.InstitutionId == CurrentInstitutionId);
+    }
+
+    // ---- Write protection: runs right before anything is saved ----
+
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        EnforceTenantRules();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        EnforceTenantRules();
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    private void EnforceTenantRules()
+    {
+        var isPlatform = currentTenant.IsPlatformScope;
+        var tenantId = currentTenant.InstitutionId;
+
+        // 1) Rows that always belong to one institution.
+        foreach (var entry in ChangeTracker.Entries<ITenantEntity>().ToList())
+        {
+            if (entry.State is EntityState.Unchanged or EntityState.Detached)
+            {
+                continue;
+            }
+
+            var typeName = entry.Metadata.ClrType.Name;
+
+            if (entry.State == EntityState.Modified && entry.Property(e => e.InstitutionId).IsModified)
+            {
+                throw new TenantViolationException($"{typeName}: the institution of an existing row cannot be changed.");
+            }
+
+            if (isPlatform)
+            {
+                if (entry.State == EntityState.Added && entry.Entity.InstitutionId == Guid.Empty)
+                {
+                    throw new TenantViolationException($"{typeName}: InstitutionId is required.");
+                }
+
+                continue;
+            }
+
+            if (tenantId is null)
+            {
+                throw new TenantViolationException("No institution in context: tenant data cannot be written.");
+            }
+
+            if (entry.State == EntityState.Added && entry.Entity.InstitutionId == Guid.Empty)
+            {
+                entry.Entity.InstitutionId = tenantId.Value;
+            }
+
+            if (entry.Entity.InstitutionId != tenantId.Value)
+            {
+                throw new TenantViolationException($"{typeName}: cannot write data of another institution.");
+            }
+        }
+
+        // 2) Rows that may belong to the platform (users and roles).
+        foreach (var entry in ChangeTracker.Entries<IOptionalTenantEntity>().ToList())
+        {
+            if (entry.State is EntityState.Unchanged or EntityState.Detached)
+            {
+                continue;
+            }
+
+            var typeName = entry.Metadata.ClrType.Name;
+
+            if (entry.State == EntityState.Modified && entry.Property(e => e.InstitutionId).IsModified)
+            {
+                throw new TenantViolationException($"{typeName}: the institution of an existing row cannot be changed.");
+            }
+
+            if (isPlatform)
+            {
+                continue;
+            }
+
+            if (tenantId is null)
+            {
+                throw new TenantViolationException("No institution in context: tenant data cannot be written.");
+            }
+
+            if (entry.State == EntityState.Added && entry.Entity.InstitutionId is null)
+            {
+                entry.Entity.InstitutionId = tenantId.Value;
+            }
+
+            if (entry.Entity.InstitutionId != tenantId.Value)
+            {
+                throw new TenantViolationException($"{typeName}: cannot write data of another institution.");
+            }
+        }
+
+        // 3) Entities that only the platform may create, delete or change.
+        if (!isPlatform)
+        {
+            foreach (var entry in ChangeTracker.Entries().ToList())
+            {
+                if (entry.Entity is Institution && entry.State is EntityState.Added or EntityState.Deleted)
+                {
+                    throw new TenantViolationException("Institutions can only be created or deleted by the platform.");
+                }
+
+                if (entry.Entity is Permission && entry.State is not (EntityState.Unchanged or EntityState.Detached))
+                {
+                    throw new TenantViolationException("The permission catalog can only be changed by the platform.");
+                }
+            }
+        }
     }
 }

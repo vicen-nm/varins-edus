@@ -1,6 +1,8 @@
+using VarinsEdu.Domain.Common;
+
 namespace VarinsEdu.Domain.Entities;
 
-public class User
+public class User : IOptionalTenantEntity
 {
     public Guid Id { get; set; }
 
