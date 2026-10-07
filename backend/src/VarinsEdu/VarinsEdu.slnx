@@ -2,4 +2,5 @@
   <Project Path="VarinsEdu.Api/VarinsEdu.Api.csproj" />
   <Project Path="VarinsEdu.Domain/VarinsEdu.Domain.csproj" />
   <Project Path="VarinsEdu.Infrastructure/VarinsEdu.Infrastructure.csproj" />
+  <Project Path="VarinsEdu.Tests/VarinsEdu.Tests.csproj" Id="b68a5ae5-872b-44fe-8913-b3aaaa04a007" />
 </Solution>
