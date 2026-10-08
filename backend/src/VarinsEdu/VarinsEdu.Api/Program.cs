@@ -9,7 +9,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using VarinsEdu.Api.Security;
-using VarinsEdu.Infrastructure.Security;
+using VarinsEdu.Infrastructure.Institutions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,6 +42,7 @@ builder.Services.AddSingleton(jwtOptions);
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<TokenService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<InstitutionService>();
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

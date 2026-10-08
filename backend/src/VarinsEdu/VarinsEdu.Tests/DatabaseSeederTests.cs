@@ -134,7 +134,7 @@ public class DatabaseSeederTests
 
         var admin = roles.Single(r => r.Key == RoleKeys.InstitutionAdmin);
         var student = roles.Single(r => r.Key == RoleKeys.Student);
-        Assert.Equal(PermissionKeys.All.Length, admin.RolePermissions.Count);
+        Assert.Equal(PermissionKeys.ForInstitutions.Length, admin.RolePermissions.Count);
         Assert.Empty(student.RolePermissions);
 
         var modules = await db.InstitutionModules.Where(m => m.InstitutionId == institutionId).ToListAsync();
@@ -170,7 +170,7 @@ public class DatabaseSeederTests
                 .Include(r => r.RolePermissions)
                 .SingleAsync(r => r.InstitutionId == institutionId && r.Key == RoleKeys.InstitutionAdmin);
 
-            Assert.Equal(PermissionKeys.All.Length - 1, admin.RolePermissions.Count);
+            Assert.Equal(PermissionKeys.ForInstitutions.Length - 1, admin.RolePermissions.Count);
         }
     }
 }

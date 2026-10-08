@@ -66,4 +66,30 @@ public class PermissionPolicyTests
             Assert.NotNull(await policies.GetPolicyAsync(key));
         }
     }
+
+    [Fact]
+    public async Task Platform_only_policy_accepts_platform_scope()
+    {
+        var auth = BuildProvider().GetRequiredService<IAuthorizationService>();
+        var platformUser = new ClaimsPrincipal(new ClaimsIdentity(
+            [new Claim(AppClaims.Scope, AppClaims.PlatformScope)],
+            authenticationType: "test"));
+
+        var result = await auth.AuthorizeAsync(platformUser, null, PolicyNames.PlatformOnly);
+
+        Assert.True(result.Succeeded);
+    }
+
+    [Fact]
+    public async Task Platform_only_policy_rejects_institution_users()
+    {
+        var auth = BuildProvider().GetRequiredService<IAuthorizationService>();
+        var tenantUser = new ClaimsPrincipal(new ClaimsIdentity(
+            [new Claim(AppClaims.InstitutionId, Guid.NewGuid().ToString())],
+            authenticationType: "test"));
+
+        var result = await auth.AuthorizeAsync(tenantUser, null, PolicyNames.PlatformOnly);
+
+        Assert.False(result.Succeeded);
+    }
 }

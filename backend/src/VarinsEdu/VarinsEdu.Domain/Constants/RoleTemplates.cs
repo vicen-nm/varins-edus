@@ -7,7 +7,7 @@ public static class RoleTemplates
 
     public static readonly IReadOnlyList<RoleTemplate> ForInstitutions =
     [
-        new(RoleKeys.InstitutionAdmin, "Institution administrator", PermissionKeys.All),
+        new(RoleKeys.InstitutionAdmin, "Institution administrator", PermissionKeys.ForInstitutions),
         new(RoleKeys.Teacher, "Teacher", [PermissionKeys.StudentsView]),
         new(RoleKeys.Student, "Student", [])
     ];

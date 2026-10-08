@@ -2,6 +2,7 @@ namespace VarinsEdu.Domain.Constants;
 
 public static class PermissionKeys
 {
+    // Permissions that can be granted inside an institution.
     public const string BrandingManage = "branding.manage";
     public const string AccessibilityManage = "accessibility.manage";
     public const string UsersManage = "users.manage";
@@ -10,7 +11,10 @@ public static class PermissionKeys
     public const string StudentsImport = "students.import";
     public const string AuditView = "audit.view";
 
-    public static readonly string[] All =
+    // Platform-level permission: only the platform role gets it, never an institution role.
+    public const string InstitutionsManage = "institutions.manage";
+
+    public static readonly string[] ForInstitutions =
     [
         BrandingManage,
         AccessibilityManage,
@@ -21,6 +25,9 @@ public static class PermissionKeys
         AuditView
     ];
 
+    // Every permission, including the platform-level ones.
+    public static readonly string[] All = [.. ForInstitutions, InstitutionsManage];
+
     public static readonly IReadOnlyDictionary<string, string> Descriptions = new Dictionary<string, string>
     {
         [BrandingManage] = "Change the institution name, logo and colors.",
@@ -29,6 +36,7 @@ public static class PermissionKeys
         [RolesManage] = "Create roles and assign permissions to them.",
         [StudentsView] = "View students and groups.",
         [StudentsImport] = "Import students from Excel.",
-        [AuditView] = "View the audit log."
+        [AuditView] = "View the audit log.",
+        [InstitutionsManage] = "Create and manage institutions (platform only)."
     };
 }

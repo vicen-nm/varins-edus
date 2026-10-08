@@ -16,6 +16,11 @@ public static class PermissionPolicies
                 .RequireClaim(AppClaims.Permission, key));
         }
 
+        // Requires a platform-level token (no institution). Combine it with a permission policy.
+        options.AddPolicy(PolicyNames.PlatformOnly, policy => policy
+            .RequireAuthenticatedUser()
+            .RequireClaim(AppClaims.Scope, AppClaims.PlatformScope));
+
         return options;
     }
 }
