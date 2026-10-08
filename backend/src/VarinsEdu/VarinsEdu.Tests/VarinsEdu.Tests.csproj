@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\VarinsEdu.Domain\VarinsEdu.Domain.csproj" />
     <ProjectReference Include="..\VarinsEdu.Infrastructure\VarinsEdu.Infrastructure.csproj" />
+    <ProjectReference Include="..\VarinsEdu.Api\VarinsEdu.Api.csproj" />
   </ItemGroup>
 
   <ItemGroup>

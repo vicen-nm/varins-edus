@@ -4,6 +4,7 @@ namespace VarinsEdu.Domain.Constants;
 public static class AppClaims
 {
     public const string InstitutionId = "institution_id";
+    public const string Permission = "permission";
     public const string Scope = "scope";
     public const string PlatformScope = "platform";
 }
