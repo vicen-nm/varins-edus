@@ -91,8 +91,15 @@ public class AuthServiceTests
         return (options, active);
     }
 
+    // Nobody is logged in yet, so there is no current user either.
+    private sealed class NoUser : ICurrentUser
+    {
+        public Guid? UserId => null;
+        public string? IpAddress => "203.0.113.7";
+    }
+
     private AuthService CreateService(DbContextOptions<AppDbContext> options) =>
-        new(new AppDbContext(options, new NoTenant()), _hasher);
+        new(new AppDbContext(options, new NoTenant()), _hasher, new NoUser(), TimeProvider.System);
 
     [Fact]
     public async Task Valid_credentials_return_the_user_with_distinct_permissions()
@@ -160,5 +167,55 @@ public class AuthServiceTests
         Assert.NotNull(user);
         Assert.True(user.IsPlatform);
         Assert.Null(user.InstitutionId);
+    }
+
+    private static async Task<List<AuditLog>> ReadAuditAsync(DbContextOptions<AppDbContext> options)
+    {
+        using var db = new AppDbContext(options, new PlatformTenant());
+        return await db.AuditLogs.ToListAsync();
+    }
+
+    [Fact]
+    public async Task Successful_login_is_audited()
+    {
+        var (options, institutionId) = CreateDb();
+
+        var user = await CreateService(options).ValidateCredentialsAsync("ana", Password);
+
+        var log = Assert.Single(await ReadAuditAsync(options));
+        Assert.Equal("auth.login.succeeded", log.Action);
+        Assert.Equal(user!.UserId, log.UserId);
+        Assert.Equal(institutionId, log.InstitutionId);
+        Assert.Equal("203.0.113.7", log.IpAddress);
+    }
+
+    [Fact]
+    public async Task Failed_login_for_an_unknown_user_is_audited_without_a_user()
+    {
+        var (options, _) = CreateDb();
+
+        await CreateService(options).ValidateCredentialsAsync("nobody", Password);
+
+        var log = Assert.Single(await ReadAuditAsync(options));
+        Assert.Equal("auth.login.failed", log.Action);
+        Assert.Null(log.UserId);
+        Assert.Null(log.InstitutionId);
+        Assert.Contains("unknown_user", log.Metadata);
+        Assert.Contains("nobody", log.Metadata);
+    }
+
+    [Fact]
+    public async Task Wrong_password_is_audited_with_the_user_and_never_stores_the_password()
+    {
+        var (options, institutionId) = CreateDb();
+
+        await CreateService(options).ValidateCredentialsAsync("ana", "not-the-password");
+
+        var log = Assert.Single(await ReadAuditAsync(options));
+        Assert.Equal("auth.login.failed", log.Action);
+        Assert.NotNull(log.UserId);
+        Assert.Equal(institutionId, log.InstitutionId);
+        Assert.Contains("wrong_password", log.Metadata);
+        Assert.DoesNotContain("not-the-password", log.Metadata);
     }
 }

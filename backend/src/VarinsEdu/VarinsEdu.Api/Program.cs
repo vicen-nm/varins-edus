@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using VarinsEdu.Api.Security;
 using VarinsEdu.Infrastructure.Institutions;
+using VarinsEdu.Infrastructure.Auditing;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,8 +23,13 @@ builder.Services.AddSingleton(
 builder.Services.AddScoped<DatabaseSeeder>();
 builder.Services.AddHostedService<SeedHostedService>();
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
+builder.Services.AddScoped<AuditSaveChangesInterceptor>();
+
+builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) =>
+    options
+        .UseNpgsql(builder.Configuration.GetConnectionString("Default"))
+        .AddInterceptors(serviceProvider.GetRequiredService<AuditSaveChangesInterceptor>()));
 
 // Add services to the container.
 

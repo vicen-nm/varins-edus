@@ -1,12 +1,19 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using VarinsEdu.Domain.Common;
+using VarinsEdu.Domain.Entities;
 using VarinsEdu.Infrastructure.Persistence;
 
 namespace VarinsEdu.Infrastructure.Security;
 
-public class AuthService(AppDbContext db, IPasswordHasher passwordHasher)
+public class AuthService(
+    AppDbContext db,
+    IPasswordHasher passwordHasher,
+    ICurrentUser currentUser,
+    TimeProvider timeProvider)
 {
     // Returns null for any failure, so callers cannot tell why (prevents user enumeration).
+    // The exact reason is only written to the audit log.
     public async Task<AuthenticatedUser?> ValidateCredentialsAsync(
         string username,
         string password,
@@ -17,18 +24,27 @@ public class AuthService(AppDbContext db, IPasswordHasher passwordHasher)
         // At login we do not know the institution yet, so this lookup deliberately skips the tenant filter.
         var user = await db.Users
             .IgnoreQueryFilters()
+            .AsNoTracking()
             .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
                     .ThenInclude(r => r.RolePermissions)
             .FirstOrDefaultAsync(u => u.Username == normalized, ct);
 
-        if (user is null || !user.IsActive)
+        if (user is null)
         {
+            await RecordAsync("auth.login.failed", null, normalized, "unknown_user", ct);
+            return null;
+        }
+
+        if (!user.IsActive)
+        {
+            await RecordAsync("auth.login.failed", user, normalized, "inactive_user", ct);
             return null;
         }
 
         if (!passwordHasher.Verify(user.PasswordHash, password))
         {
+            await RecordAsync("auth.login.failed", user, normalized, "wrong_password", ct);
             return null;
         }
 
@@ -40,6 +56,7 @@ public class AuthService(AppDbContext db, IPasswordHasher passwordHasher)
 
             if (!institutionIsActive)
             {
+                await RecordAsync("auth.login.failed", user, normalized, "inactive_institution", ct);
                 return null;
             }
         }
@@ -51,6 +68,28 @@ public class AuthService(AppDbContext db, IPasswordHasher passwordHasher)
             .Order()
             .ToList();
 
+        await RecordAsync("auth.login.succeeded", user, normalized, null, ct);
+
         return new AuthenticatedUser(user.Id, user.Username, user.InstitutionId, permissions);
+    }
+
+    private async Task RecordAsync(string action, User? user, string attemptedUsername, string? reason, CancellationToken ct)
+    {
+        // Never store the password. The attempted username is cut to a safe length.
+        var shownUsername = attemptedUsername.Length > 100 ? attemptedUsername[..100] : attemptedUsername;
+
+        db.AuditLogs.Add(new AuditLog
+        {
+            InstitutionId = user?.InstitutionId,
+            UserId = user?.Id,
+            Action = action,
+            EntityType = "User",
+            EntityId = user?.Id.ToString(),
+            OccurredAt = timeProvider.GetUtcNow(),
+            IpAddress = currentUser.IpAddress,
+            Metadata = JsonSerializer.Serialize(new { username = shownUsername, reason })
+        });
+
+        await db.SaveChangesAsync(ct);
     }
 }
