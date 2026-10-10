@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using VarinsEdu.Api.Errors;
 using VarinsEdu.Domain.Common;
 using VarinsEdu.Infrastructure.Persistence;
 
@@ -17,7 +18,7 @@ public class InstitutionController(AppDbContext db, ICurrentTenant tenant) : Con
     {
         if (tenant.InstitutionId is null)
         {
-            return BadRequest(new { error = "Platform users do not belong to an institution." });
+            return this.ApiProblem(StatusCodes.Status400BadRequest, "platform_user_has_no_institution", "Platform users do not belong to an institution.");
         }
 
         // No Where() here on purpose: the tenant filter leaves only the caller's institution visible.
@@ -29,7 +30,7 @@ public class InstitutionController(AppDbContext db, ICurrentTenant tenant) : Con
 
         if (institution is null)
         {
-            return NotFound();
+            return this.ApiProblem(StatusCodes.Status404NotFound, "institution_not_found", "Institution not found.");
         }
 
         return Ok(new

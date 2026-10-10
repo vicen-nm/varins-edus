@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VarinsEdu.Api.Errors;
 using VarinsEdu.Api.Security;
 using VarinsEdu.Domain.Constants;
 using VarinsEdu.Infrastructure.Security;
@@ -16,14 +17,14 @@ public class AuthController(AuthService authService, TokenService tokenService) 
     {
         if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
         {
-            return BadRequest(new { error = "Username and password are required." });
+            return this.ApiProblem(StatusCodes.Status400BadRequest, "missing_credentials", "Username and password are required.");
         }
 
         var user = await authService.ValidateCredentialsAsync(request.Username, request.Password, ct);
 
         if (user is null)
         {
-            return Unauthorized(new { error = "Invalid username or password." });
+            return this.ApiProblem(StatusCodes.Status401Unauthorized, "invalid_credentials", "Invalid username or password.");
         }
 
         var (token, expiresAt) = tokenService.CreateToken(user);

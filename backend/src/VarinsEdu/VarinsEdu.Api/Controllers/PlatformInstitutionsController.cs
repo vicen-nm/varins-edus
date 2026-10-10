@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using VarinsEdu.Api.Errors;
 using VarinsEdu.Api.Security;
 using VarinsEdu.Domain.Constants;
 using VarinsEdu.Infrastructure.Institutions;
@@ -41,16 +42,24 @@ public class PlatformInstitutionsController(InstitutionService institutionServic
                 new { institutionId = result.InstitutionId, adminUserId = result.AdminUserId });
         }
 
-        var body = new { error = result.Error.ToString() };
+        var status = result.Error is InstitutionCreateError.SlugTaken or InstitutionCreateError.UsernameTaken
+            ? StatusCodes.Status409Conflict
+            : StatusCodes.Status400BadRequest;
 
-        IActionResult response = result.Error switch
-        {
-            InstitutionCreateError.SlugTaken or InstitutionCreateError.UsernameTaken => Conflict(body),
-            _ => BadRequest(body)
-        };
-
-        return response;
+        return this.ApiProblem(status, ToCode(result.Error), "The institution could not be created.");
     }
+
+    // Stable codes that the frontend can translate.
+    private static string ToCode(InstitutionCreateError error) => error switch
+    {
+        InstitutionCreateError.SlugTaken => "slug_taken",
+        InstitutionCreateError.UsernameTaken => "username_taken",
+        InstitutionCreateError.InvalidName => "invalid_name",
+        InstitutionCreateError.InvalidSlug => "invalid_slug",
+        InstitutionCreateError.InvalidUsername => "invalid_username",
+        InstitutionCreateError.WeakPassword => "weak_password",
+        _ => "invalid_request"
+    };
 }
 
 public record CreateInstitutionRequest(string Name, string Slug, string AdminUsername, string AdminPassword);
