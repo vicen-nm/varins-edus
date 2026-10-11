@@ -12,6 +12,7 @@ dist/
 .vite/
 coverage/
 *.tsbuildinfo
+dev-dist/
 
 # Environment and secrets (keep only the template)
 .env
