@@ -8,11 +8,11 @@
   --color-text-muted: #4d5f70;
   --color-border: #d5dee7;
 
-  /* Brand: an institution will be able to override these later */
-  --color-primary: #007c99;
-  --color-primary-hover: #006a83;
+  /* Brand: an institution overrides these through the --brand-* variables (see theme/applyBranding.ts) */
+  --color-primary: var(--brand-primary-light, #007690);
+  --color-primary-hover: var(--brand-primary-hover-light, #00667c);
   --color-on-primary: #ffffff;
-  --color-accent-soft: #e0f4f9;
+  --color-accent-soft: var(--brand-accent-soft-light, #e0eff2);
 
   --color-danger: #b3261e;
   --color-danger-soft: #fdecea;
@@ -38,10 +38,10 @@
     --color-text-muted: #9fb0c0;
     --color-border: #243447;
 
-    --color-primary: #2cc3e3;
-    --color-primary-hover: #5fd4ec;
+    --color-primary: var(--brand-primary-dark, #2cc3e3);
+    --color-primary-hover: var(--brand-primary-hover-dark, #5fd4ec);
     --color-on-primary: #04202a;
-    --color-accent-soft: #0f2f3a;
+    --color-accent-soft: var(--brand-accent-soft-dark, #0f2f3a);
 
     --color-danger: #ff8a80;
     --color-danger-soft: #3a1714;

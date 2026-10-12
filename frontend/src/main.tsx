@@ -7,12 +7,15 @@ import './styles/theme.css';
 import './styles/global.css';
 import App from './App';
 import { AuthProvider } from './auth/AuthProvider';
+import { InstitutionProvider } from './institution/InstitutionProvider';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <App />
+        <InstitutionProvider>
+          <App />
+        </InstitutionProvider>
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>,

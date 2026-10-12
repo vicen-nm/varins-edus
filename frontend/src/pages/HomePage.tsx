@@ -1,42 +1,17 @@
-import { useEffect, useState } from 'react';
-import { apiFetch } from '../api/client';
-import { errorMessage } from '../api/errors';
-import type { InstitutionDetails } from '../api/types';
+import { Link } from 'react-router';
 import { useAuth } from '../auth/useAuth';
+import { useInstitution } from '../institution/useInstitution';
 
 export function HomePage() {
   const { user, logout } = useAuth();
-  const [institution, setInstitution] = useState<InstitutionDetails | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  // Platform users belong to no institution, so there is nothing to load for them.
-  useEffect(() => {
-    if (!user || user.isPlatform) {
-      return;
-    }
-
-    let cancelled = false;
-
-    apiFetch<InstitutionDetails>('/api/institution')
-      .then((data) => {
-        if (!cancelled) {
-          setInstitution(data);
-        }
-      })
-      .catch((e) => {
-        if (!cancelled) {
-          setError(errorMessage(e));
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [user]);
+  const { institution, error } = useInstitution();
 
   if (!user) {
     return null;
   }
+
+  const institutionName = institution?.settings?.displayName || institution?.name;
+  const canEditBranding = !user.isPlatform && user.permissions.includes('branding.manage');
 
   return (
     <main className="page">
@@ -47,7 +22,7 @@ export function HomePage() {
           <p>
             {user.isPlatform
               ? 'Administrador de plataforma'
-              : (institution?.name ?? 'Cargando tu institución…')}
+              : (institutionName ?? 'Cargando tu institución…')}
           </p>
         </div>
         <button type="button" className="secondary" onClick={logout}>
@@ -58,6 +33,14 @@ export function HomePage() {
       {error && (
         <p role="alert" className="error">
           {error}
+        </p>
+      )}
+
+      {canEditBranding && (
+        <p>
+          <Link to="/settings/branding" className="link">
+            Identidad de la institución
+          </Link>
         </p>
       )}
 

@@ -50,6 +50,7 @@ if (jwtOptions.Key.Length < 32)
 
 builder.Services.AddSingleton(jwtOptions);
 builder.Services.AddSingleton<TokenService>();
+builder.Services.AddScoped<BrandingService>();
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
