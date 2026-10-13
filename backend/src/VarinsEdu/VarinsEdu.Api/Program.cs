@@ -14,6 +14,7 @@ using VarinsEdu.Infrastructure.Institutions;
 using VarinsEdu.Infrastructure.Persistence;
 using VarinsEdu.Infrastructure.Security;
 using VarinsEdu.Infrastructure.Seeding;
+using VarinsEdu.Infrastructure.Imports;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -83,6 +84,7 @@ builder.Services.AddSingleton(
     builder.Configuration.GetSection(SeedOptions.SectionName).Get<SeedOptions>() ?? new SeedOptions());
 builder.Services.AddScoped<DatabaseSeeder>();
 builder.Services.AddHostedService<SeedHostedService>();
+builder.Services.AddScoped<StudentImportService>();
 
 var app = builder.Build();
 
