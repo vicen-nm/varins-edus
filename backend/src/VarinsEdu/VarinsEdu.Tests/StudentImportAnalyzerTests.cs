@@ -111,9 +111,13 @@ public class StudentImportAnalyzerTests
                 new ExcelRow(3, ["B456", "Foo", "Beto", "Dos"])
             ]);
 
-        var mapping = new Dictionary<string, string>(Mapping)
+        // Only the columns this sheet really has.
+        var mapping = new Dictionary<string, string>
         {
-            [StudentImportFields.IdentificationType] = "Tipo"
+            [StudentImportFields.IdentificationNumber] = "Cédula",
+            [StudentImportFields.IdentificationType] = "Tipo",
+            [StudentImportFields.FirstName] = "Nombre",
+            [StudentImportFields.LastName] = "Apellidos"
         };
 
         var analysis = StudentImportAnalyzer.Analyze(sheet, mapping, new HashSet<string>(), []);
