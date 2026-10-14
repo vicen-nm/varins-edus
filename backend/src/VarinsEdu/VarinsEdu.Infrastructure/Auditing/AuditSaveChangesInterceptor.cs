@@ -11,7 +11,8 @@ namespace VarinsEdu.Infrastructure.Auditing;
 public class AuditSaveChangesInterceptor(
     ICurrentTenant tenant,
     ICurrentUser currentUser,
-    TimeProvider timeProvider) : SaveChangesInterceptor
+    TimeProvider timeProvider,
+    AuditSuppression? suppression = null) : SaveChangesInterceptor
 {
     private const string Redacted = "[redacted]";
 
@@ -45,6 +46,11 @@ public class AuditSaveChangesInterceptor(
     private void AddAuditRows(DbContext? context)
     {
         if (context is null)
+        {
+            return;
+        }
+
+        if (suppression?.IsSuppressed == true)
         {
             return;
         }

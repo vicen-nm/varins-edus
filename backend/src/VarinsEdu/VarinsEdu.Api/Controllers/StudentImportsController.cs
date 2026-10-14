@@ -10,11 +10,12 @@ namespace VarinsEdu.Api.Controllers;
 [ApiController]
 [Route("api/imports/students")]
 [Authorize(Policy = PermissionKeys.StudentsImport)]
-public class StudentImportsController(StudentImportService importService) : ControllerBase
+public class StudentImportsController(StudentImportService previewService, StudentImportCommitter committer)
+    : ControllerBase
 {
     private const long MaxFileBytes = 5 * 1024 * 1024;
 
-    // Reads the Excel file and shows what an import would do, without saving anything.
+    // Shows what an import would do, without saving anything.
     // "mapping" is optional JSON: { "identificationNumber": "Cédula", "firstName": "Nombre", ... }
     [HttpPost("preview")]
     [RequestSizeLimit(MaxFileBytes + 1024 * 1024)]
@@ -23,19 +24,78 @@ public class StudentImportsController(StudentImportService importService) : Cont
         [FromForm] string? mapping,
         CancellationToken ct)
     {
+        var (error, buffer, parsedMapping) = await ReadInputAsync(file, mapping, ct);
+
+        if (error is not null)
+        {
+            return error;
+        }
+
+        await using (buffer!)
+        {
+            try
+            {
+                return Ok(await previewService.PreviewAsync(buffer!, parsedMapping, ct));
+            }
+            catch (ImportFileException ex)
+            {
+                return this.ApiProblem(StatusCodes.Status400BadRequest, ex.Code, "The file could not be read.");
+            }
+        }
+    }
+
+    // Saves the import. Returns each new student's activation code ONCE: it is stored only as a fingerprint.
+    [HttpPost("commit")]
+    [RequestSizeLimit(MaxFileBytes + 1024 * 1024)]
+    public async Task<IActionResult> Commit(
+        [FromForm] IFormFile? file,
+        [FromForm] string? mapping,
+        CancellationToken ct)
+    {
+        var (error, buffer, parsedMapping) = await ReadInputAsync(file, mapping, ct);
+
+        if (error is not null)
+        {
+            return error;
+        }
+
+        await using (buffer!)
+        {
+            try
+            {
+                var result = await committer.CommitAsync(buffer!, file!.FileName, parsedMapping, ct);
+
+                // The response carries secrets: no browser or proxy may keep a copy.
+                Response.Headers.CacheControl = "no-store";
+
+                return Ok(result);
+            }
+            catch (ImportFileException ex)
+            {
+                return this.ApiProblem(StatusCodes.Status400BadRequest, ex.Code, "The file could not be imported.");
+            }
+        }
+    }
+
+    // Shared checks for both endpoints: file present, small, .xlsx, and a valid optional mapping.
+    private async Task<(IActionResult? Error, MemoryStream? Buffer, Dictionary<string, string>? Mapping)> ReadInputAsync(
+        IFormFile? file,
+        string? mapping,
+        CancellationToken ct)
+    {
         if (file is null || file.Length == 0)
         {
-            return this.ApiProblem(StatusCodes.Status400BadRequest, "file_required", "An Excel file is required.");
+            return (this.ApiProblem(StatusCodes.Status400BadRequest, "file_required", "An Excel file is required."), null, null);
         }
 
         if (file.Length > MaxFileBytes)
         {
-            return this.ApiProblem(StatusCodes.Status400BadRequest, "file_too_large", "The file cannot be larger than 5 MB.");
+            return (this.ApiProblem(StatusCodes.Status400BadRequest, "file_too_large", "The file cannot be larger than 5 MB."), null, null);
         }
 
         if (!file.FileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
         {
-            return this.ApiProblem(StatusCodes.Status400BadRequest, "invalid_file", "Only .xlsx files are accepted.");
+            return (this.ApiProblem(StatusCodes.Status400BadRequest, "invalid_file", "Only .xlsx files are accepted."), null, null);
         }
 
         Dictionary<string, string>? parsedMapping = null;
@@ -48,21 +108,14 @@ public class StudentImportsController(StudentImportService importService) : Cont
             }
             catch (JsonException)
             {
-                return this.ApiProblem(StatusCodes.Status400BadRequest, "invalid_mapping", "The column mapping is not valid.");
+                return (this.ApiProblem(StatusCodes.Status400BadRequest, "invalid_mapping", "The column mapping is not valid."), null, null);
             }
         }
 
-        await using var buffer = new MemoryStream();
+        var buffer = new MemoryStream();
         await file.CopyToAsync(buffer, ct);
         buffer.Position = 0;
 
-        try
-        {
-            return Ok(await importService.PreviewAsync(buffer, parsedMapping, ct));
-        }
-        catch (ImportFileException ex)
-        {
-            return this.ApiProblem(StatusCodes.Status400BadRequest, ex.Code, "The file could not be read.");
-        }
+        return (null, buffer, parsedMapping);
     }
 }

@@ -78,13 +78,16 @@ builder.Services.AddAuthorization(options => options.AddPermissionPolicies());
 // --- Application services ---
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<InstitutionService>();
+builder.Services.AddScoped<DatabaseSeeder>();
+builder.Services.AddHostedService<SeedHostedService>();
+builder.Services.AddScoped<StudentImportService>();
+builder.Services.AddScoped<AuditSuppression>();
+builder.Services.AddSingleton(new ActivationCodeHasher(jwtOptions.Key));
+builder.Services.AddScoped<StudentImportCommitter>();
 
 // --- Seed data at startup ---
 builder.Services.AddSingleton(
     builder.Configuration.GetSection(SeedOptions.SectionName).Get<SeedOptions>() ?? new SeedOptions());
-builder.Services.AddScoped<DatabaseSeeder>();
-builder.Services.AddHostedService<SeedHostedService>();
-builder.Services.AddScoped<StudentImportService>();
 
 var app = builder.Build();
 
