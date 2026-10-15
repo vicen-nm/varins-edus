@@ -84,6 +84,8 @@ builder.Services.AddScoped<StudentImportService>();
 builder.Services.AddScoped<AuditSuppression>();
 builder.Services.AddSingleton(new ActivationCodeHasher(jwtOptions.Key));
 builder.Services.AddScoped<StudentImportCommitter>();
+builder.Services.AddAppRateLimiting();
+builder.Services.AddScoped<StudentActivationService>();
 
 // --- Seed data at startup ---
 builder.Services.AddSingleton(
@@ -103,6 +105,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors(CorsSetup.PolicyName);
+app.UseHttpsRedirection();
+app.UseCors(CorsSetup.PolicyName);
+app.UseRateLimiter();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseAuthentication();
 app.UseAuthorization();
 
