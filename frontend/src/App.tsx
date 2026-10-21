@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router';
 import { RequireAuth } from './auth/RequireAuth';
+import { ActivatePage } from './pages/ActivatePage';
 import { BrandingPage } from './pages/BrandingPage';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
@@ -11,6 +12,7 @@ export default function App() {
     <>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/activar/:slug" element={<ActivatePage />} />
         <Route element={<RequireAuth />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/settings/branding" element={<BrandingPage />} />

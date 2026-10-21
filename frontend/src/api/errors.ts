@@ -10,6 +10,11 @@ const messages: Record<string, string> = {
   invalid_color: 'Los colores deben tener el formato #RRGGBB.',
   invalid_display_name: 'El nombre debe tener entre 3 y 200 caracteres.',
   platform_user_has_no_institution: 'Los usuarios de plataforma no pertenecen a una institución.',
+  activation_failed:
+    'No pudimos activar tu cuenta con esos datos. Revisa tu cédula y tu código, o pide uno nuevo en tu colegio.',
+  weak_password:
+    'La contraseña es muy débil. Usa al menos 8 caracteres, sin tu cédula ni claves comunes como 12345678.',
+  too_many_requests: 'Demasiados intentos. Espera un momento y vuelve a intentarlo.',
   http_401: 'Tu sesión venció. Inicia sesión de nuevo.',
   http_403: 'No tienes permiso para realizar esta acción.',
 };

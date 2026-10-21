@@ -4,7 +4,8 @@ import { apiFetch } from '../api/client';
 import { errorMessage } from '../api/errors';
 import type { InstitutionDetails } from '../api/types';
 import { useAuth } from '../auth/useAuth';
-import { applyBranding } from '../theme/applyBranding';
+import { applyBranding, brandingOf } from '../theme/applyBranding';
+import type { BrandingValues } from '../theme/applyBranding';
 import { InstitutionContext } from './institutionContext';
 import type { InstitutionContextValue } from './institutionContext';
 
@@ -16,6 +17,7 @@ export function InstitutionProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [failed, setFailed] = useState<Failed | null>(null);
+  const [publicBranding, setPublicBranding] = useState<BrandingValues | null>(null);
 
   const reload = useCallback(async () => {
     if (!user || user.isPlatform) {
@@ -56,13 +58,13 @@ export function InstitutionProvider({ children }: { children: ReactNode }) {
   const institution = user && loaded?.userId === user.userId ? loaded.data : null;
   const error = user && failed?.userId === user.userId ? failed.message : null;
 
-  // Dress the whole app with the institution's identity. With no institution, defaults come back.
+  // The user's institution wins; before login, the public identity of the school (if any) is used.
   useEffect(() => {
-    applyBranding(institution);
-  }, [institution]);
+    applyBranding(brandingOf(institution) ?? publicBranding);
+  }, [institution, publicBranding]);
 
   const value = useMemo<InstitutionContextValue>(
-    () => ({ institution, error, reload }),
+    () => ({ institution, error, reload, setPublicBranding }),
     [institution, error, reload],
   );
 

@@ -31,3 +31,9 @@ export type InstitutionDetails = {
   } | null;
   modules: InstitutionModule[];
 };
+
+export type PublicInstitution = {
+  name: string;
+  primaryColor: string | null;
+  accentColor: string | null;
+};
