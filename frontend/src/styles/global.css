@@ -240,3 +240,51 @@ input[type='color'] {
   background: var(--color-accent-soft);
   border-radius: var(--radius);
 }
+
+select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  font: inherit;
+  color: inherit;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+select:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.filters {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.filters label {
+  margin-top: 0;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.table button {
+  min-height: 36px;
+  padding: 0 var(--space-3);
+}

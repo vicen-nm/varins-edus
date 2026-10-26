@@ -12,6 +12,7 @@ export function HomePage() {
 
   const institutionName = institution?.settings?.displayName || institution?.name;
   const canEditBranding = !user.isPlatform && user.permissions.includes('branding.manage');
+    const canViewStudents = !user.isPlatform && user.permissions.includes('students.view');
 
   return (
     <main className="page">
@@ -40,6 +41,14 @@ export function HomePage() {
         <p>
           <Link to="/settings/branding" className="link">
             Identidad de la institución
+          </Link>
+        </p>
+      )}
+
+            {canViewStudents && (
+        <p>
+          <Link to="/students" className="link">
+            Estudiantes
           </Link>
         </p>
       )}

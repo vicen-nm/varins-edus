@@ -37,3 +37,30 @@ export type PublicInstitution = {
   primaryColor: string | null;
   accentColor: string | null;
 };
+
+export type StudentItem = {
+  personId: string;
+  identificationNumber: string;
+  firstName: string;
+  lastName: string;
+  groupId: string | null;
+  group: string | null;
+  hasAccount: boolean;
+  codeStatus: 'none' | 'pending' | 'expired' | 'locked' | 'used';
+  codeExpiresAt: string | null;
+};
+
+export type StudentList = {
+  total: number;
+  items: StudentItem[];
+};
+
+export type GroupItem = {
+  id: string;
+  name: string;
+};
+
+export type RegeneratedCode = {
+  code: string;
+  expiresAt: string;
+};

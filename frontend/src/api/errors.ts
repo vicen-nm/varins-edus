@@ -14,6 +14,8 @@ const messages: Record<string, string> = {
     'No pudimos activar tu cuenta con esos datos. Revisa tu cédula y tu código, o pide uno nuevo en tu colegio.',
   weak_password:
     'La contraseña es muy débil. Usa al menos 8 caracteres, sin tu cédula ni claves comunes como 12345678.',
+      student_not_found: 'No se encontró al estudiante.',
+  student_has_account: 'Este estudiante ya activó su cuenta y no necesita un código.',
   too_many_requests: 'Demasiados intentos. Espera un momento y vuelve a intentarlo.',
   http_401: 'Tu sesión venció. Inicia sesión de nuevo.',
   http_403: 'No tienes permiso para realizar esta acción.',
