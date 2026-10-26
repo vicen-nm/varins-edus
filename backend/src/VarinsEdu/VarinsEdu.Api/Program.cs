@@ -15,6 +15,7 @@ using VarinsEdu.Infrastructure.Persistence;
 using VarinsEdu.Infrastructure.Security;
 using VarinsEdu.Infrastructure.Seeding;
 using VarinsEdu.Infrastructure.Imports;
+using VarinsEdu.Infrastructure.Students;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -86,6 +87,7 @@ builder.Services.AddSingleton(new ActivationCodeHasher(jwtOptions.Key));
 builder.Services.AddScoped<StudentImportCommitter>();
 builder.Services.AddAppRateLimiting();
 builder.Services.AddScoped<StudentActivationService>();
+builder.Services.AddScoped<StudentManagementService>();
 
 // --- Seed data at startup ---
 builder.Services.AddSingleton(
