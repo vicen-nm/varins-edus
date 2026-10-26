@@ -64,3 +64,38 @@ export type RegeneratedCode = {
   code: string;
   expiresAt: string;
 };
+
+export type RowError = { rowNumber: number; code: string };
+
+export type ImportPreview = {
+  headers: string[];
+  suggestedMapping: Record<string, string>;
+  mapping: Record<string, string>;
+  missingFields: string[];
+  totalRows: number;
+  sample: string[][];
+  summary: {
+    newStudents: number;
+    existingStudents: number;
+    errorRows: number;
+    errors: RowError[];
+    groupsToCreate: string[];
+  } | null;
+};
+
+export type IssuedCode = {
+  identificationNumber: string;
+  firstName: string;
+  lastName: string;
+  group: string | null;
+  code: string;
+};
+
+export type ImportResult = {
+  batchId: string;
+  created: number;
+  alreadyExisted: number;
+  errorRows: number;
+  errors: RowError[];
+  codes: IssuedCode[];
+};

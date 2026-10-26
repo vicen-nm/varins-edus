@@ -159,6 +159,13 @@ export function StudentsPage() {
           No tienes permiso para ver a los estudiantes.
         </p>
       )}
+                {canGenerate && (
+            <p>
+              <Link to="/students/import" className="link">
+                Importar desde Excel
+              </Link>
+            </p>
+          )}
 
       {canView && (
         <>

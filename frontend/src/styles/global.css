@@ -288,3 +288,32 @@ select:focus-visible {
   min-height: 36px;
   padding: 0 var(--space-3);
 }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    color: #000;
+    background: #fff;
+    border: 0;
+  }
+
+  .print-area code {
+    background: none;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}

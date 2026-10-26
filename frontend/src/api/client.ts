@@ -34,7 +34,8 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
   const headers = new Headers(init.headers);
   headers.set('Accept', 'application/json');
 
-  if (init.body) {
+  // A multipart body (FormData) must keep the boundary the browser sets itself.
+  if (init.body && !(init.body instanceof FormData)) {
     headers.set('Content-Type', 'application/json');
   }
 
