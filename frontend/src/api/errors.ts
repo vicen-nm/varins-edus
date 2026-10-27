@@ -24,6 +24,7 @@ const messages: Record<string, string> = {
   too_many_columns: 'El archivo tiene demasiadas columnas.',
   too_many_rows: 'El archivo tiene demasiadas filas (máximo 5000).',
   missing_required_mapping: 'Falta indicar la columna de cédula, nombre o apellidos.',
+  card_unavailable: 'Tu cuenta no tiene un carné digital activo. Consulta en tu colegio.',
   too_many_requests: 'Demasiados intentos. Espera un momento y vuelve a intentarlo.',
   http_401: 'Tu sesión venció. Inicia sesión de nuevo.',
   http_403: 'No tienes permiso para realizar esta acción.',

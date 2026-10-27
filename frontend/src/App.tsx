@@ -8,6 +8,7 @@ import { StudentsPage } from './pages/StudentsPage';
 import { OfflineBanner } from './pwa/OfflineBanner';
 import { UpdatePrompt } from './pwa/UpdatePrompt';
 import { ImportStudentsPage } from './pages/ImportStudentsPage';
+import { CardPage } from './pages/CardPage';
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="/settings/branding" element={<BrandingPage />} />
           <Route path="/students" element={<StudentsPage />} />
           <Route path="/students/import" element={<ImportStudentsPage />} />
+          <Route path="/card" element={<CardPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -317,3 +317,26 @@ select:focus-visible {
     display: none !important;
   }
 }
+
+.id-card {
+  max-width: 380px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.qr-box {
+  display: inline-block;
+  width: 100%;
+  max-width: 300px;
+  margin: var(--space-3) 0;
+  padding: var(--space-3);
+  background: #ffffff;
+  border-radius: var(--radius);
+  line-height: 0;
+}
+
+.qr-box svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}

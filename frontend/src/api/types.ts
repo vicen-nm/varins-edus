@@ -99,3 +99,11 @@ export type ImportResult = {
   errors: RowError[];
   codes: IssuedCode[];
 };
+
+export type StudentCard = {
+  firstName: string;
+  lastName: string;
+  group: string | null;
+  token: string;
+  expiresAt: string;
+};

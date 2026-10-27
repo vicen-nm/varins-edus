@@ -5,6 +5,7 @@ import { useInstitution } from '../institution/useInstitution';
 export function HomePage() {
   const { user, logout } = useAuth();
   const { institution, error } = useInstitution();
+  
 
   if (!user) {
     return null;
@@ -12,7 +13,9 @@ export function HomePage() {
 
   const institutionName = institution?.settings?.displayName || institution?.name;
   const canEditBranding = !user.isPlatform && user.permissions.includes('branding.manage');
-    const canViewStudents = !user.isPlatform && user.permissions.includes('students.view');
+  const canViewStudents = !user.isPlatform && user.permissions.includes('students.view');
+  const canShowCard = !user.isPlatform;
+  
 
   return (
     <main className="page">
@@ -49,6 +52,14 @@ export function HomePage() {
         <p>
           <Link to="/students" className="link">
             Estudiantes
+          </Link>
+        </p>
+      )}
+
+            {canShowCard && (
+        <p>
+          <Link to="/card" className="link">
+            Mi carné
           </Link>
         </p>
       )}
