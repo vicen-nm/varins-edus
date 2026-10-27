@@ -2,6 +2,13 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
+// The API runs on HTTPS with a development certificate: "secure: false" accepts it.
+// The browser (or the phone) only talks to Vite, so the API is "same origin" as in production.
+const apiProxy = {
+  '/api': { target: 'https://localhost:7172', secure: false },
+  '/health': { target: 'https://localhost:7172', secure: false },
+};
+
 export default defineConfig({
   plugins: [
     react(),
@@ -44,11 +51,13 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: true,
+    proxy: apiProxy,
   },
-  // Same port as the dev server, because it is the origin the API allows in CORS.
+  // Same port as the dev server.
   preview: {
     port: 5173,
     strictPort: true,
+    proxy: apiProxy,
   },
   test: {
     include: ['src/**/*.test.ts'],

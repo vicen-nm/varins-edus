@@ -9,6 +9,8 @@ import { OfflineBanner } from './pwa/OfflineBanner';
 import { UpdatePrompt } from './pwa/UpdatePrompt';
 import { ImportStudentsPage } from './pages/ImportStudentsPage';
 import { CardPage } from './pages/CardPage';
+import { AccessManualPage } from './pages/AccessManualPage';
+import { AccessPointsPage } from './pages/AccessPointsPage';
 
 export default function App() {
   return (
@@ -22,6 +24,8 @@ export default function App() {
           <Route path="/students" element={<StudentsPage />} />
           <Route path="/students/import" element={<ImportStudentsPage />} />
           <Route path="/card" element={<CardPage />} />
+          <Route path="/access/points" element={<AccessPointsPage />} />
+          <Route path="/access/manual" element={<AccessManualPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

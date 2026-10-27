@@ -107,3 +107,31 @@ export type StudentCard = {
   token: string;
   expiresAt: string;
 };
+
+export type AccessPoint = {
+  id: string;
+  name: string;
+  kind: 'cafeteria' | 'gate';
+  latitude: number | null;
+  longitude: number | null;
+  radiusMeters: number;
+  maxAccuracyMeters: number;
+  isActive: boolean;
+};
+
+export type AccessService = {
+  id: string;
+  accessPointId: string;
+  name: string;
+  startTime: string;
+  endTime: string;
+  isActive: boolean;
+};
+
+export type RegistrationResult = {
+  firstName: string;
+  lastName: string;
+  pointName: string;
+  serviceName: string;
+  occurredAt: string;
+};

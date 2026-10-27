@@ -15,6 +15,8 @@ export function HomePage() {
   const canEditBranding = !user.isPlatform && user.permissions.includes('branding.manage');
   const canViewStudents = !user.isPlatform && user.permissions.includes('students.view');
   const canShowCard = !user.isPlatform;
+  const canManageAccess = !user.isPlatform && user.permissions.includes('access.manage');
+  const canScanAccess = !user.isPlatform && user.permissions.includes('access.scan');
   
 
   return (
@@ -60,6 +62,22 @@ export function HomePage() {
         <p>
           <Link to="/card" className="link">
             Mi carné
+          </Link>
+        </p>
+      )}
+
+            {canManageAccess && (
+        <p>
+          <Link to="/access/points" className="link">
+            Puntos de acceso
+          </Link>
+        </p>
+      )}
+
+      {canScanAccess && (
+        <p>
+          <Link to="/access/manual" className="link">
+            Registro manual del comedor
           </Link>
         </p>
       )}
