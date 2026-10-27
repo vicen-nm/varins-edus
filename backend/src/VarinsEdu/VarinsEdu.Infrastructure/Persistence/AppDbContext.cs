@@ -24,6 +24,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentTenant
     public DbSet<ImportBatch> ImportBatches => Set<ImportBatch>();
     public DbSet<ActivationCode> ActivationCodes => Set<ActivationCode>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<AccessPoint> AccessPoints => Set<AccessPoint>();
+    public DbSet<AccessService> AccessServices => Set<AccessService>();
+    public DbSet<AccessEvent> AccessEvents => Set<AccessEvent>();
 
     // The query filters read these two properties every time a query runs.
     private Guid? CurrentInstitutionId => currentTenant.InstitutionId;

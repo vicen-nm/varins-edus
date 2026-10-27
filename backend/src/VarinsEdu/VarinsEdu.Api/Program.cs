@@ -1,20 +1,21 @@
-using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using System.Text;
 using VarinsEdu.Api.Errors;
 using VarinsEdu.Api.Security;
 using VarinsEdu.Api.Seeding;
 using VarinsEdu.Api.Setup;
 using VarinsEdu.Api.Tenancy;
 using VarinsEdu.Domain.Common;
+using VarinsEdu.Infrastructure.Access;
 using VarinsEdu.Infrastructure.Auditing;
+using VarinsEdu.Infrastructure.Imports;
 using VarinsEdu.Infrastructure.Institutions;
 using VarinsEdu.Infrastructure.Persistence;
 using VarinsEdu.Infrastructure.Security;
 using VarinsEdu.Infrastructure.Seeding;
-using VarinsEdu.Infrastructure.Imports;
 using VarinsEdu.Infrastructure.Students;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -90,7 +91,11 @@ builder.Services.AddScoped<StudentActivationService>();
 builder.Services.AddScoped<StudentManagementService>();
 builder.Services.AddSingleton<CardTokenService>(serviceProvider =>
     new CardTokenService(jwtOptions.Key, serviceProvider.GetRequiredService<TimeProvider>()));
+builder.Services.AddSingleton<AccessPointTokenService>(serviceProvider =>
+    new AccessPointTokenService(jwtOptions.Key, serviceProvider.GetRequiredService<TimeProvider>()));
 builder.Services.AddScoped<StudentCardService>();
+builder.Services.AddScoped<AccessPointService>();
+builder.Services.AddScoped<AccessRegistrationService>();
 
 // --- Seed data at startup ---
 builder.Services.AddSingleton(

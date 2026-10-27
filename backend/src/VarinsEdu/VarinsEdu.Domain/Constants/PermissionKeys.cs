@@ -10,6 +10,9 @@ public static class PermissionKeys
     public const string StudentsView = "students.view";
     public const string StudentsImport = "students.import";
     public const string AuditView = "audit.view";
+    public const string AccessManage = "access.manage";
+    public const string AccessScan = "access.scan";
+    public const string AccessView = "access.view";
 
     // Platform-level permission: only the platform role gets it, never an institution role.
     public const string InstitutionsManage = "institutions.manage";
@@ -22,7 +25,10 @@ public static class PermissionKeys
         RolesManage,
         StudentsView,
         StudentsImport,
-        AuditView
+        AuditView,
+        AccessManage,
+        AccessScan,
+        AccessView
     ];
 
     // Every permission, including the platform-level ones.
@@ -37,6 +43,9 @@ public static class PermissionKeys
         [StudentsView] = "View students and groups.",
         [StudentsImport] = "Import students from Excel.",
         [AuditView] = "View the audit log.",
-        [InstitutionsManage] = "Create and manage institutions (platform only)."
+        [InstitutionsManage] = "Create and manage institutions (platform only).",
+        [AccessManage] = "Configure access points (cafeteria) and their service schedules.",
+        [AccessScan] = "Register access manually and show an access point's QR screen.",
+        [AccessView] = "View the access registrations.",
     };
 }

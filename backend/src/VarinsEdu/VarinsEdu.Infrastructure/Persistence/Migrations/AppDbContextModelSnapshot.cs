@@ -22,6 +22,165 @@ namespace VarinsEdu.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("VarinsEdu.Domain.Entities.AccessEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AccessPointId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("access_point_id");
+
+                    b.Property<Guid>("AccessServiceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("access_service_id");
+
+                    b.Property<int?>("DistanceMeters")
+                        .HasColumnType("integer")
+                        .HasColumnName("distance_meters");
+
+                    b.Property<Guid>("InstitutionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("institution_id");
+
+                    b.Property<string>("Method")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("method");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("person_id");
+
+                    b.Property<Guid?>("RecordedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("recorded_by_user_id");
+
+                    b.Property<DateOnly>("ServiceDate")
+                        .HasColumnType("date")
+                        .HasColumnName("service_date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccessPointId");
+
+                    b.HasIndex("PersonId");
+
+                    b.HasIndex("RecordedByUserId");
+
+                    b.HasIndex("InstitutionId", "ServiceDate");
+
+                    b.HasIndex("AccessServiceId", "PersonId", "ServiceDate")
+                        .IsUnique();
+
+                    b.ToTable("access_events");
+                });
+
+            modelBuilder.Entity("VarinsEdu.Domain.Entities.AccessPoint", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("InstitutionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("institution_id");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("kind");
+
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("double precision")
+                        .HasColumnName("latitude");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("double precision")
+                        .HasColumnName("longitude");
+
+                    b.Property<int>("MaxAccuracyMeters")
+                        .HasColumnType("integer")
+                        .HasColumnName("max_accuracy_meters");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<int>("RadiusMeters")
+                        .HasColumnType("integer")
+                        .HasColumnName("radius_meters");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InstitutionId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("access_points");
+                });
+
+            modelBuilder.Entity("VarinsEdu.Domain.Entities.AccessService", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AccessPointId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("access_point_id");
+
+                    b.Property<TimeOnly>("EndTime")
+                        .HasColumnType("time without time zone")
+                        .HasColumnName("end_time");
+
+                    b.Property<Guid>("InstitutionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("institution_id");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("name");
+
+                    b.Property<TimeOnly>("StartTime")
+                        .HasColumnType("time without time zone")
+                        .HasColumnName("start_time");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InstitutionId");
+
+                    b.HasIndex("AccessPointId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("access_services");
+                });
+
             modelBuilder.Entity("VarinsEdu.Domain.Entities.ActivationCode", b =>
                 {
                     b.Property<Guid>("Id")
@@ -577,6 +736,68 @@ namespace VarinsEdu.Infrastructure.Persistence.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("user_roles");
+                });
+
+            modelBuilder.Entity("VarinsEdu.Domain.Entities.AccessEvent", b =>
+                {
+                    b.HasOne("VarinsEdu.Domain.Entities.AccessPoint", "AccessPoint")
+                        .WithMany()
+                        .HasForeignKey("AccessPointId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VarinsEdu.Domain.Entities.AccessService", "AccessService")
+                        .WithMany()
+                        .HasForeignKey("AccessServiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VarinsEdu.Domain.Entities.Institution", null)
+                        .WithMany()
+                        .HasForeignKey("InstitutionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VarinsEdu.Domain.Entities.Person", "Person")
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VarinsEdu.Domain.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("RecordedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("AccessPoint");
+
+                    b.Navigation("AccessService");
+
+                    b.Navigation("Person");
+                });
+
+            modelBuilder.Entity("VarinsEdu.Domain.Entities.AccessPoint", b =>
+                {
+                    b.HasOne("VarinsEdu.Domain.Entities.Institution", null)
+                        .WithMany()
+                        .HasForeignKey("InstitutionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("VarinsEdu.Domain.Entities.AccessService", b =>
+                {
+                    b.HasOne("VarinsEdu.Domain.Entities.AccessPoint", null)
+                        .WithMany()
+                        .HasForeignKey("AccessPointId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VarinsEdu.Domain.Entities.Institution", null)
+                        .WithMany()
+                        .HasForeignKey("InstitutionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("VarinsEdu.Domain.Entities.ActivationCode", b =>
