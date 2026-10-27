@@ -88,6 +88,9 @@ builder.Services.AddScoped<StudentImportCommitter>();
 builder.Services.AddAppRateLimiting();
 builder.Services.AddScoped<StudentActivationService>();
 builder.Services.AddScoped<StudentManagementService>();
+builder.Services.AddSingleton<CardTokenService>(serviceProvider =>
+    new CardTokenService(jwtOptions.Key, serviceProvider.GetRequiredService<TimeProvider>()));
+builder.Services.AddScoped<StudentCardService>();
 
 // --- Seed data at startup ---
 builder.Services.AddSingleton(
