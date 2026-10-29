@@ -11,6 +11,9 @@ import { ImportStudentsPage } from './pages/ImportStudentsPage';
 import { CardPage } from './pages/CardPage';
 import { AccessManualPage } from './pages/AccessManualPage';
 import { AccessPointsPage } from './pages/AccessPointsPage';
+import { AccessEventsPage } from './pages/AccessEventsPage';
+import { CafeteriaScanPage } from './pages/CafeteriaScanPage';
+import { CafeteriaScreenPage } from './pages/CafeteriaScreenPage';
 
 export default function App() {
   return (
@@ -26,6 +29,9 @@ export default function App() {
           <Route path="/card" element={<CardPage />} />
           <Route path="/access/points" element={<AccessPointsPage />} />
           <Route path="/access/manual" element={<AccessManualPage />} />
+          <Route path="/access/screen" element={<CafeteriaScreenPage />} />
+          <Route path="/access/scan" element={<CafeteriaScanPage />} />
+          <Route path="/access/events" element={<AccessEventsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

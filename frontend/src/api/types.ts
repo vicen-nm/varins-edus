@@ -135,3 +135,24 @@ export type RegistrationResult = {
   serviceName: string;
   occurredAt: string;
 };
+
+export type AccessQr = {
+  token: string;
+  expiresAt: string;
+};
+
+export type AccessEventItem = {
+  id: string;
+  pointName: string;
+  serviceName: string;
+  firstName: string;
+  lastName: string;
+  method: 'qr' | 'manual';
+  occurredAt: string;
+  serviceDate: string;
+};
+
+export type AccessEventPage = {
+  total: number;
+  items: AccessEventItem[];
+};

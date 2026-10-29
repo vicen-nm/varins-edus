@@ -340,3 +340,24 @@ select:focus-visible {
   width: 100%;
   height: auto;
 }
+
+.qr-screen {
+  text-align: center;
+}
+
+.qr-screen .qr-box {
+  max-width: min(80vmin, 520px);
+}
+
+.scan-video {
+  width: 100%;
+  max-width: 420px;
+  border-radius: var(--radius);
+  background: #000000;
+}
+
+.token-text {
+  display: block;
+  overflow-wrap: anywhere;
+  text-align: left;
+}

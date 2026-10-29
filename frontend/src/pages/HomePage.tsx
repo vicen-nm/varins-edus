@@ -17,6 +17,7 @@ export function HomePage() {
   const canShowCard = !user.isPlatform;
   const canManageAccess = !user.isPlatform && user.permissions.includes('access.manage');
   const canScanAccess = !user.isPlatform && user.permissions.includes('access.scan');
+  const canViewAccess = !user.isPlatform && user.permissions.includes('access.view');
   
 
   return (
@@ -78,6 +79,30 @@ export function HomePage() {
         <p>
           <Link to="/access/manual" className="link">
             Registro manual del comedor
+          </Link>
+        </p>
+      )}
+
+            {canScanAccess && (
+        <p>
+          <Link to="/access/screen" className="link">
+            Pantalla del comedor
+          </Link>
+        </p>
+      )}
+
+      {canViewAccess && (
+        <p>
+          <Link to="/access/events" className="link">
+            Registros de acceso
+          </Link>
+        </p>
+      )}
+
+      {!user.isPlatform && (
+        <p>
+          <Link to="/access/scan" className="link">
+            Registrar mi comida (escanear QR)
           </Link>
         </p>
       )}
