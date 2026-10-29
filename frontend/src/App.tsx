@@ -14,6 +14,7 @@ import { AccessPointsPage } from './pages/AccessPointsPage';
 import { AccessEventsPage } from './pages/AccessEventsPage';
 import { CafeteriaScanPage } from './pages/CafeteriaScanPage';
 import { CafeteriaScreenPage } from './pages/CafeteriaScreenPage';
+import { AccessReportPage } from './pages/AccessReportPage';
 
 export default function App() {
   return (
@@ -32,6 +33,7 @@ export default function App() {
           <Route path="/access/screen" element={<CafeteriaScreenPage />} />
           <Route path="/access/scan" element={<CafeteriaScanPage />} />
           <Route path="/access/events" element={<AccessEventsPage />} />
+          <Route path="/access/report" element={<AccessReportPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

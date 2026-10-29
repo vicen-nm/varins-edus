@@ -107,6 +107,14 @@ export function HomePage() {
         </p>
       )}
 
+            {canViewAccess && (
+        <p>
+          <Link to="/access/report" className="link">
+            Reporte del comedor
+          </Link>
+        </p>
+      )}
+
       <section className="card" aria-labelledby="permissions-title">
         <h2 id="permissions-title">Tus permisos</h2>
         {user.permissions.length === 0 ? (

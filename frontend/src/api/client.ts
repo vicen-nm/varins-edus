@@ -71,3 +71,36 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
 
   return (await response.json()) as T;
 }
+
+// Downloads a file the API protects with the session token (a plain link would not send it).
+export async function apiDownload(path: string): Promise<Blob> {
+  const headers = new Headers();
+  const token = loadSession()?.accessToken ?? null;
+
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL}${path}`, { headers });
+  } catch {
+    throw new ApiError(0, 'network_error', 'Could not reach the server.');
+  }
+
+  if (response.status === 401 && token) {
+    window.dispatchEvent(new Event(UNAUTHORIZED_EVENT));
+  }
+
+  if (!response.ok) {
+    const problem = await readProblem(response);
+    throw new ApiError(
+      response.status,
+      problem.code ?? `http_${response.status}`,
+      problem.title ?? response.statusText,
+      problem.traceId,
+    );
+  }
+
+  return response.blob();
+}

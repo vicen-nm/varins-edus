@@ -156,3 +156,24 @@ export type AccessEventPage = {
   total: number;
   items: AccessEventItem[];
 };
+
+export type ReportTotals = { total: number; qr: number; manual: number };
+
+export type ReportDayRow = {
+  date: string;
+  point: string;
+  service: string;
+  total: number;
+  qr: number;
+  manual: number;
+};
+
+export type ReportGroupRow = { group: string | null; total: number };
+
+export type AccessReport = {
+  from: string;
+  to: string;
+  totals: ReportTotals;
+  byDay: ReportDayRow[];
+  byGroup: ReportGroupRow[];
+};
