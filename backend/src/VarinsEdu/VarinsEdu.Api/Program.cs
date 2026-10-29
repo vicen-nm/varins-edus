@@ -96,6 +96,7 @@ builder.Services.AddSingleton<AccessPointTokenService>(serviceProvider =>
 builder.Services.AddScoped<StudentCardService>();
 builder.Services.AddScoped<AccessPointService>();
 builder.Services.AddScoped<AccessRegistrationService>();
+builder.Services.AddScoped<AccessReportService>();
 
 // --- Seed data at startup ---
 builder.Services.AddSingleton(
