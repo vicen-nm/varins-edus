@@ -1,15 +1,16 @@
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { QRCodeSVG } from 'qrcode.react';
 import { apiFetch } from '../api/client';
 import { errorMessage } from '../api/errors';
 import type { StudentCard } from '../api/types';
 import { useAuth } from '../auth/useAuth';
+import { useRefreshingValue } from '../hooks/useRefreshingValue';
 
 // The token lives 45 s on the server: renewing every 25 s always leaves time to scan it.
 const REFRESH_MS = 25_000;
 
-type Info = { firstName: string; lastName: string; group: string | null };
+// Defined outside the component so it keeps its identity, which the hook relies on.
+const loadCard = () => apiFetch<StudentCard>('/api/me/card');
 
 export function CardPage() {
   const { user } = useAuth();
@@ -17,71 +18,7 @@ export function CardPage() {
   // Hiding things is only a convenience: the server decides who has a card.
   const allowed = Boolean(user && !user.isPlatform);
 
-  const [info, setInfo] = useState<Info | null>(null);
-  const [qr, setQr] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!allowed) {
-      return;
-    }
-
-    let cancelled = false;
-    let timer: number | undefined;
-
-    function schedule() {
-      if (!cancelled) {
-        timer = window.setTimeout(load, REFRESH_MS);
-      }
-    }
-
-    async function load() {
-      if (document.hidden) {
-        schedule();
-        return;
-      }
-
-      try {
-        const card = await apiFetch<StudentCard>('/api/me/card');
-
-        if (cancelled) {
-          return;
-        }
-
-        setInfo({ firstName: card.firstName, lastName: card.lastName, group: card.group });
-        setQr(card.token);
-        setError(null);
-      } catch (e) {
-        if (!cancelled) {
-          // Never keep showing a code that may already be expired.
-          setQr(null);
-          setError(errorMessage(e));
-        }
-      }
-
-      schedule();
-    }
-
-    function handleVisibility() {
-      window.clearTimeout(timer);
-
-      if (document.hidden) {
-        setQr(null);
-        return;
-      }
-
-      void load();
-    }
-
-    document.addEventListener('visibilitychange', handleVisibility);
-    void load();
-
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timer);
-      document.removeEventListener('visibilitychange', handleVisibility);
-    };
-  }, [allowed]);
+  const { value: card, error } = useRefreshingValue(allowed ? loadCard : null, REFRESH_MS);
 
   return (
     <main className="page">
@@ -101,26 +38,24 @@ export function CardPage() {
         </p>
       )}
 
-      {allowed && error && (
+      {allowed && error !== null && (
         <p role="alert" className="error">
-          {error}
+          {errorMessage(error)}
         </p>
       )}
 
-      {allowed && !error && !qr && <p>Cargando…</p>}
+      {allowed && error === null && !card && <p>Cargando…</p>}
 
-      {allowed && info && (
+      {allowed && card && (
         <section className="card id-card" aria-labelledby="card-name">
           <h2 id="card-name">
-            {info.firstName} {info.lastName}
+            {card.firstName} {card.lastName}
           </h2>
-          <p>{info.group ?? 'Sin grupo'}</p>
+          <p>{card.group ?? 'Sin grupo'}</p>
 
-          {qr && (
-            <div className="qr-box" role="img" aria-label="Código QR de tu carné. Cambia cada pocos segundos.">
-              <QRCodeSVG value={qr} size={256} level="M" bgColor="#ffffff" fgColor="#000000" />
-            </div>
-          )}
+          <div className="qr-box" role="img" aria-label="Código QR de tu carné. Cambia cada pocos segundos.">
+            <QRCodeSVG value={card.token} size={256} level="M" bgColor="#ffffff" fgColor="#000000" />
+          </div>
 
           <p className="hint">El código cambia solo. No lo compartas ni lo captures.</p>
         </section>

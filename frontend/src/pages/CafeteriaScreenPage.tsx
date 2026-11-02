@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router';
 import { QRCodeSVG } from 'qrcode.react';
 import { apiFetch } from '../api/client';
 import { errorMessage } from '../api/errors';
 import type { AccessPoint, AccessQr } from '../api/types';
 import { useAuth } from '../auth/useAuth';
+import { useRefreshingValue } from '../hooks/useRefreshingValue';
 
 // The token lives 30 s on the server: renewing every 10 s always leaves time to scan it.
 const REFRESH_MS = 10_000;
@@ -18,7 +19,6 @@ export function CafeteriaScreenPage() {
   const [points, setPoints] = useState<AccessPoint[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [pointId, setPointId] = useState('');
-  const [qr, setQr] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -50,67 +50,16 @@ export function CafeteriaScreenPage() {
     };
   }, [allowed]);
 
-  useEffect(() => {
-    if (!pointId) {
-      return;
-    }
+  // A new function per point: the hook starts over (and drops the old QR) when the point changes.
+  const loadQr = useMemo(
+    () => (pointId ? () => apiFetch<AccessQr>(`/api/access-points/${pointId}/qr`) : null),
+    [pointId],
+  );
 
-    let cancelled = false;
-    let timer: number | undefined;
+  const { value: qrData, error: qrError } = useRefreshingValue(loadQr, REFRESH_MS);
 
-    function schedule() {
-      if (!cancelled) {
-        timer = window.setTimeout(load, REFRESH_MS);
-      }
-    }
-
-    async function load() {
-      if (document.hidden) {
-        schedule();
-        return;
-      }
-
-      try {
-        const result = await apiFetch<AccessQr>(`/api/access-points/${pointId}/qr`);
-
-        if (cancelled) {
-          return;
-        }
-
-        setQr(result.token);
-        setError(null);
-      } catch (e) {
-        if (!cancelled) {
-          // Never keep showing a code that may already be expired.
-          setQr(null);
-          setError(errorMessage(e));
-        }
-      }
-
-      schedule();
-    }
-
-    function handleVisibility() {
-      window.clearTimeout(timer);
-
-      if (document.hidden) {
-        setQr(null);
-        return;
-      }
-
-      void load();
-    }
-
-    document.addEventListener('visibilitychange', handleVisibility);
-    void load();
-
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timer);
-      document.removeEventListener('visibilitychange', handleVisibility);
-    };
-  }, [pointId]);
-
+  const qr = qrData?.token ?? null;
+  const shownError = error ?? (qrError !== null ? errorMessage(qrError) : null);
   const point = points.find((p) => p.id === pointId) ?? null;
 
   return (
@@ -140,14 +89,7 @@ export function CafeteriaScreenPage() {
       {allowed && points.length > 1 && (
         <section className="card">
           <label htmlFor="screen-point">Punto</label>
-          <select
-            id="screen-point"
-            value={pointId}
-            onChange={(e) => {
-              setQr(null);
-              setPointId(e.target.value);
-            }}
-          >
+          <select id="screen-point" value={pointId} onChange={(e) => setPointId(e.target.value)}>
             {points.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
@@ -163,9 +105,9 @@ export function CafeteriaScreenPage() {
         </p>
       )}
 
-      {allowed && error && (
+      {allowed && shownError && (
         <p role="alert" className="error">
-          {error}
+          {shownError}
         </p>
       )}
 
@@ -179,7 +121,7 @@ export function CafeteriaScreenPage() {
               <QRCodeSVG value={qr} size={256} level="M" bgColor="#ffffff" fgColor="#000000" />
             </div>
           ) : (
-            !error && <p>Cargando…</p>
+            !shownError && <p>Cargando…</p>
           )}
 
           <p className="hint">El código cambia solo cada pocos segundos.</p>

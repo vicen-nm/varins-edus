@@ -2,23 +2,56 @@ import { Link } from 'react-router';
 import { useAuth } from '../auth/useAuth';
 import { useInstitution } from '../institution/useInstitution';
 
+type NavLink = { to: string; label: string; visible: boolean };
+
 export function HomePage() {
   const { user, logout } = useAuth();
   const { institution, error } = useInstitution();
-  
 
   if (!user) {
     return null;
   }
 
   const institutionName = institution?.settings?.displayName || institution?.name;
-  const canEditBranding = !user.isPlatform && user.permissions.includes('branding.manage');
-  const canViewStudents = !user.isPlatform && user.permissions.includes('students.view');
-  const canShowCard = !user.isPlatform;
-  const canManageAccess = !user.isPlatform && user.permissions.includes('access.manage');
-  const canScanAccess = !user.isPlatform && user.permissions.includes('access.scan');
-  const canViewAccess = !user.isPlatform && user.permissions.includes('access.view');
-  
+
+  // Hiding links is only a convenience: the server enforces every permission.
+  const inInstitution = !user.isPlatform;
+  const can = (permission: string) => inInstitution && user.permissions.includes(permission);
+
+  const sections: { title: string; links: NavLink[] }[] = [
+    {
+      title: 'Mi cuenta',
+      links: [
+        { to: '/card', label: 'Mi carné', visible: inInstitution },
+        { to: '/access/scan', label: 'Registrar mi comida (escanear QR)', visible: inInstitution },
+      ],
+    },
+    {
+      title: 'Comedor',
+      links: [
+        { to: '/access/screen', label: 'Pantalla del comedor', visible: can('access.scan') },
+        { to: '/access/manual', label: 'Registro manual', visible: can('access.scan') },
+        { to: '/access/events', label: 'Registros de acceso', visible: can('access.view') },
+        { to: '/access/report', label: 'Reporte del comedor', visible: can('access.view') },
+      ],
+    },
+    {
+      title: 'Estudiantes',
+      links: [
+        { to: '/students', label: 'Estudiantes', visible: can('students.view') },
+        { to: '/students/import', label: 'Importar desde Excel', visible: can('students.import') },
+      ],
+    },
+    {
+      title: 'Configuración',
+      links: [
+        { to: '/settings/branding', label: 'Identidad de la institución', visible: can('branding.manage') },
+        { to: '/access/points', label: 'Puntos de acceso y horarios', visible: can('access.manage') },
+      ],
+    },
+  ]
+    .map((section) => ({ ...section, links: section.links.filter((link) => link.visible) }))
+    .filter((section) => section.links.length > 0);
 
   return (
     <main className="page">
@@ -43,77 +76,20 @@ export function HomePage() {
         </p>
       )}
 
-      {canEditBranding && (
-        <p>
-          <Link to="/settings/branding" className="link">
-            Identidad de la institución
-          </Link>
-        </p>
-      )}
-
-            {canViewStudents && (
-        <p>
-          <Link to="/students" className="link">
-            Estudiantes
-          </Link>
-        </p>
-      )}
-
-            {canShowCard && (
-        <p>
-          <Link to="/card" className="link">
-            Mi carné
-          </Link>
-        </p>
-      )}
-
-            {canManageAccess && (
-        <p>
-          <Link to="/access/points" className="link">
-            Puntos de acceso
-          </Link>
-        </p>
-      )}
-
-      {canScanAccess && (
-        <p>
-          <Link to="/access/manual" className="link">
-            Registro manual del comedor
-          </Link>
-        </p>
-      )}
-
-            {canScanAccess && (
-        <p>
-          <Link to="/access/screen" className="link">
-            Pantalla del comedor
-          </Link>
-        </p>
-      )}
-
-      {canViewAccess && (
-        <p>
-          <Link to="/access/events" className="link">
-            Registros de acceso
-          </Link>
-        </p>
-      )}
-
-      {!user.isPlatform && (
-        <p>
-          <Link to="/access/scan" className="link">
-            Registrar mi comida (escanear QR)
-          </Link>
-        </p>
-      )}
-
-            {canViewAccess && (
-        <p>
-          <Link to="/access/report" className="link">
-            Reporte del comedor
-          </Link>
-        </p>
-      )}
+      {sections.map((section, index) => (
+        <section key={section.title} className="card" aria-labelledby={`nav-${index}`}>
+          <h2 id={`nav-${index}`}>{section.title}</h2>
+          <ul className="link-list">
+            {section.links.map((link) => (
+              <li key={link.to}>
+                <Link to={link.to} className="link">
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
 
       <section className="card" aria-labelledby="permissions-title">
         <h2 id="permissions-title">Tus permisos</h2>

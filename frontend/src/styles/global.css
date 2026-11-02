@@ -361,3 +361,17 @@ select:focus-visible {
   overflow-wrap: anywhere;
   text-align: left;
 }
+
+.link-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.link-list a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+}
