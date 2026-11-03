@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using VarinsEdu.Api.Errors;
+using VarinsEdu.Api.Setup;
 using VarinsEdu.Domain.Constants;
 using VarinsEdu.Infrastructure.Access;
 
@@ -16,6 +18,7 @@ public class AccessController(AccessRegistrationService access) : ControllerBase
     // but only an active student gets registered, and only as herself.
     [HttpPost("checkin")]
     [Authorize]
+    [EnableRateLimiting(RateLimitSetup.CheckInPolicy)]
     public async Task<IActionResult> CheckIn([FromBody] CheckInCommand command, CancellationToken ct) =>
         this.ToResult(await access.CheckInAsync(command, ct));
 

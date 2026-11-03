@@ -116,12 +116,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors(CorsSetup.PolicyName);
-app.UseHttpsRedirection();
-app.UseCors(CorsSetup.PolicyName);
+app.UseAuthentication();
+
 app.UseRateLimiter();
-app.UseAuthentication();
-app.UseAuthorization();
-app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

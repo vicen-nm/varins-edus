@@ -7,10 +7,20 @@ namespace VarinsEdu.Api.Setup;
 public static class RateLimitSetup
 {
     public const string AnonymousAuthPolicy = "anonymous-auth";
+    public const string CardPolicy = "card";
+    public const string CheckInPolicy = "check-in";
 
     // Many students share the school's single public IP, so this only stops floods.
     // Guessing codes and passwords is stopped by per-code and per-account limits instead.
     private const int PermitsPerMinute = 60;
+
+    // Per signed-in user: the card renews itself every 25 s, and nobody needs many check-in attempts.
+    private const int CardPermitsPerMinute = 30;
+    private const int CheckInPermitsPerMinute = 10;
+
+    // Each person gets their own counter. Without a session the IP is used.
+    public static string PartitionKey(string? userId, string? ipAddress) =>
+        string.IsNullOrEmpty(userId) ? $"ip:{ipAddress ?? "unknown"}" : $"user:{userId}";
 
     public static IServiceCollection AddAppRateLimiting(this IServiceCollection services)
     {
@@ -27,6 +37,9 @@ public static class RateLimitSetup
                         Window = TimeSpan.FromMinutes(1),
                         QueueLimit = 0
                     }));
+
+            AddUserPolicy(options, CardPolicy, CardPermitsPerMinute);
+            AddUserPolicy(options, CheckInPolicy, CheckInPermitsPerMinute);
 
             options.OnRejected = async (context, cancellationToken) =>
             {
@@ -54,4 +67,18 @@ public static class RateLimitSetup
 
         return services;
     }
+
+    // Needs the user to be known, so UseRateLimiter must run after UseAuthentication.
+    private static void AddUserPolicy(RateLimiterOptions options, string name, int permitsPerMinute) =>
+        options.AddPolicy(name, httpContext =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                PartitionKey(
+                    httpContext.User.FindFirst("sub")?.Value,
+                    httpContext.Connection.RemoteIpAddress?.ToString()),
+                _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = permitsPerMinute,
+                    Window = TimeSpan.FromMinutes(1),
+                    QueueLimit = 0
+                }));
 }

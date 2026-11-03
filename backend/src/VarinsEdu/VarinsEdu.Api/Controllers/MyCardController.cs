@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using VarinsEdu.Api.Errors;
+using VarinsEdu.Api.Setup;
 using VarinsEdu.Infrastructure.Students;
 
 namespace VarinsEdu.Api.Controllers;
@@ -12,6 +14,7 @@ public class MyCardController(StudentCardService cards) : ControllerBase
 {
     // Any signed-in user may ask, but only an active student gets a card, and only their own.
     [HttpGet]
+    [EnableRateLimiting(RateLimitSetup.CardPolicy)]
     public async Task<IActionResult> Get(CancellationToken ct)
     {
         var result = await cards.GetAsync(ct);

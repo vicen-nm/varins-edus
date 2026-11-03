@@ -72,11 +72,6 @@ public class AuthController(
         permissions = User.FindAll(AppClaims.Permission).Select(c => c.Value).ToList()
     });
 
-    // Temporary endpoint to try a permission policy.
-    [HttpGet("users-check")]
-    [Authorize(Policy = PermissionKeys.UsersManage)]
-    public IActionResult UsersCheck() => Ok(new { allowed = true });
-
     private LoginResponse ToResponse(AuthenticatedUser user)
     {
         var (token, expiresAt) = tokenService.CreateToken(user);
