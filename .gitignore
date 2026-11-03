@@ -35,3 +35,7 @@ npm-debug.log*
 
 # Local data
 pgdata/
+
+# Local test files
+backend/*.xlsx
+backend/mapping.json
