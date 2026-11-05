@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using VarinsEdu.Api.Errors;
@@ -13,8 +14,9 @@ namespace VarinsEdu.Api.Controllers;
 [Route("api/auth")]
 public class AuthController(
     AuthService authService,
-    StudentActivationService activationService,
-    TokenService tokenService) : ControllerBase
+        StudentActivationService activationService,
+    TokenService tokenService,
+    PasswordService passwordService) : ControllerBase
 {
     [HttpPost("login")]
     [AllowAnonymous]
@@ -72,6 +74,42 @@ public class AuthController(
         permissions = User.FindAll(AppClaims.Permission).Select(c => c.Value).ToList()
     });
 
+    // A person chooses a new password with the one-time code the school gave them.
+    // Every problem with the code answers the same way, so nobody can learn who has an account.
+    [HttpPost("reset-password")]
+    [AllowAnonymous]
+    [EnableRateLimiting(RateLimitSetup.AnonymousAuthPolicy)]
+    public async Task<IActionResult> ResetPassword(ResetPasswordRequest request, CancellationToken ct) =>
+        PasswordResponse(
+            await passwordService.ResetAsync(
+                new ResetPasswordCommand(request.Username, request.Code, request.NewPassword), ct),
+            "reset_failed");
+
+    [HttpPost("change-password")]
+    [Authorize]
+    public async Task<IActionResult> ChangePassword(ChangePasswordRequest request, CancellationToken ct) =>
+        PasswordResponse(
+            await passwordService.ChangeAsync(new ChangePasswordCommand(request.CurrentPassword, request.NewPassword), ct),
+            "password_change_failed");
+
+    private IActionResult PasswordResponse(PasswordResult result, string failureCode)
+    {
+        if (result.Succeeded)
+        {
+            return NoContent();
+        }
+
+        return result.Error switch
+        {
+            PasswordError.Weak =>
+                this.ApiProblem(StatusCodes.Status400BadRequest, "weak_password", "The password is too weak."),
+            PasswordError.InvalidCurrentPassword =>
+                this.ApiProblem(StatusCodes.Status400BadRequest, "invalid_current_password", "The current password is not correct."),
+            _ =>
+                this.ApiProblem(StatusCodes.Status400BadRequest, failureCode, "The request could not be completed.")
+        };
+    }
+
     private LoginResponse ToResponse(AuthenticatedUser user)
     {
         var (token, expiresAt) = tokenService.CreateToken(user);
@@ -95,3 +133,7 @@ public record UserInfo(
     IReadOnlyCollection<string> Permissions);
 
 public record LoginResponse(string AccessToken, DateTimeOffset ExpiresAt, UserInfo User);
+
+public record ResetPasswordRequest(string Username, string Code, string NewPassword);
+
+public record ChangePasswordRequest(string CurrentPassword, string NewPassword);

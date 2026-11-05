@@ -473,6 +473,53 @@ namespace VarinsEdu.Infrastructure.Persistence.Migrations
                     b.ToTable("institution_settings");
                 });
 
+            modelBuilder.Entity("VarinsEdu.Domain.Entities.PasswordResetCode", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("CodeHash")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("code_hash");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<int>("FailedAttempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("failed_attempts");
+
+                    b.Property<Guid>("InstitutionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("institution_id");
+
+                    b.Property<DateTimeOffset?>("UsedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("used_at");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InstitutionId");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("password_reset_codes");
+                });
+
             modelBuilder.Entity("VarinsEdu.Domain.Entities.Permission", b =>
                 {
                     b.Property<string>("Key")
@@ -647,6 +694,10 @@ namespace VarinsEdu.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<int>("FailedLoginAttempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("failed_login_attempts");
+
                     b.Property<Guid?>("InstitutionId")
                         .HasColumnType("uuid")
                         .HasColumnName("institution_id");
@@ -658,6 +709,10 @@ namespace VarinsEdu.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset?>("LastLoginAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_login_at");
+
+                    b.Property<DateTimeOffset?>("LockedUntil")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("locked_until");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -864,6 +919,21 @@ namespace VarinsEdu.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Institution");
+                });
+
+            modelBuilder.Entity("VarinsEdu.Domain.Entities.PasswordResetCode", b =>
+                {
+                    b.HasOne("VarinsEdu.Domain.Entities.Institution", null)
+                        .WithMany()
+                        .HasForeignKey("InstitutionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VarinsEdu.Domain.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("VarinsEdu.Domain.Entities.Person", b =>

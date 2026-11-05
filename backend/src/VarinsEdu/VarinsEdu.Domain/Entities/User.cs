@@ -9,7 +9,7 @@ public class User : IOptionalTenantEntity
     // Null = platform-level user (superadmin), not tied to any institution.
     public Guid? InstitutionId { get; set; }
 
-    // Null for platform users, who have no Person record.
+    // Null for platform users and staff, who have no Person record.
     public Guid? PersonId { get; set; }
     public Person? Person { get; set; }
 
@@ -18,6 +18,10 @@ public class User : IOptionalTenantEntity
     public bool IsActive { get; set; } = true;
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? LastLoginAt { get; set; }
+
+    // Per-account login protection (see LoginPolicy).
+    public int FailedLoginAttempts { get; set; }
+    public DateTimeOffset? LockedUntil { get; set; }
 
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 }

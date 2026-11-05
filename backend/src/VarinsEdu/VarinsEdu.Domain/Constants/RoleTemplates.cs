@@ -9,6 +9,7 @@ public static class RoleTemplates
     [
         new(RoleKeys.InstitutionAdmin, "Institution administrator", PermissionKeys.ForInstitutions),
         new(RoleKeys.Teacher, "Teacher", [PermissionKeys.StudentsView]),
+        new(RoleKeys.CafeteriaStaff, "Cafeteria staff", [PermissionKeys.AccessScan, PermissionKeys.AccessView]),
         new(RoleKeys.Student, "Student", [])
     ];
 }

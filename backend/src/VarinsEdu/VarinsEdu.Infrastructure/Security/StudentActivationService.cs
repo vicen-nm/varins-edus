@@ -33,19 +33,13 @@ public class StudentActivationService(
 {
     public const int MaxFailedAttempts = 5;
 
-    private const int MinPasswordLength = 8;
-    private const int MaxPasswordLength = 128;
-
-    private static readonly string[] CommonPasswords =
-        ["12345678", "123456789", "1234567890", "password", "contrasena", "qwertyui", "11111111"];
-
     public async Task<ActivationResult> ActivateAsync(ActivationCommand command, CancellationToken ct = default)
     {
         var slug = command.InstitutionSlug.Trim().ToLowerInvariant();
         var identification = IdentificationNumbers.Normalize(command.IdentificationNumber);
 
         // Checked first and cheap: a weak password never uses up an attempt.
-        if (IsWeak(command.Password, identification))
+        if (PasswordPolicy.IsWeak(command.Password, PasswordPolicy.StudentMinLength, identification))
         {
             return new ActivationResult(ActivationError.WeakPassword);
         }
@@ -186,27 +180,6 @@ public class StudentActivationService(
             ActivationError.None,
             new AuthenticatedUser(user.Id, username, institutionId, permissions));
     }
-
-    private static bool IsWeak(string password, string identification)
-    {
-        if (password.Length < MinPasswordLength || password.Length > MaxPasswordLength)
-        {
-            return true;
-        }
-
-        if (identification.Length > 0 && password.Contains(identification, StringComparison.OrdinalIgnoreCase))
-        {
-            return true;
-        }
-
-        if (CommonPasswords.Contains(password.ToLowerInvariant()))
-        {
-            return true;
-        }
-
-        return password.Distinct().Count() == 1;
-    }
-
     // Records the exact reason, but never the identification number that was tried.
     private async Task<ActivationResult> FailAsync(Guid? institutionId, Guid? personId, string reason, CancellationToken ct)
     {

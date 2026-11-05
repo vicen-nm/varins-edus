@@ -6,6 +6,7 @@ using VarinsEdu.Infrastructure.Persistence;
 using VarinsEdu.Infrastructure.Security;
 using VarinsEdu.Infrastructure.Seeding;
 using Xunit;
+using VarinsEdu.Infrastructure.Auditing;
 
 namespace VarinsEdu.Tests;
 
@@ -99,7 +100,7 @@ public class AuthServiceTests
     }
 
     private AuthService CreateService(DbContextOptions<AppDbContext> options) =>
-        new(new AppDbContext(options, new NoTenant()), _hasher, new NoUser(), TimeProvider.System);
+    new(new AppDbContext(options, new NoTenant()), _hasher, new NoUser(), TimeProvider.System, options, new AuditSuppression());
 
     [Fact]
     public async Task Valid_credentials_return_the_user_with_distinct_permissions()

@@ -10,6 +10,7 @@ using VarinsEdu.Api.Setup;
 using VarinsEdu.Api.Tenancy;
 using VarinsEdu.Domain.Common;
 using VarinsEdu.Infrastructure.Access;
+using VarinsEdu.Infrastructure.Accounts;
 using VarinsEdu.Infrastructure.Auditing;
 using VarinsEdu.Infrastructure.Imports;
 using VarinsEdu.Infrastructure.Institutions;
@@ -97,6 +98,9 @@ builder.Services.AddScoped<StudentCardService>();
 builder.Services.AddScoped<AccessPointService>();
 builder.Services.AddScoped<AccessRegistrationService>();
 builder.Services.AddScoped<AccessReportService>();
+builder.Services.AddSingleton(new ResetCodeHasher(jwtOptions.Key));
+builder.Services.AddScoped<PasswordService>();
+builder.Services.AddScoped<UserManagementService>();
 
 // --- Seed data at startup ---
 builder.Services.AddSingleton(

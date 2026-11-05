@@ -27,6 +27,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentTenant
     public DbSet<AccessPoint> AccessPoints => Set<AccessPoint>();
     public DbSet<AccessService> AccessServices => Set<AccessService>();
     public DbSet<AccessEvent> AccessEvents => Set<AccessEvent>();
+    public DbSet<PasswordResetCode> PasswordResetCodes => Set<PasswordResetCode>();
 
     // The query filters read these two properties every time a query runs.
     private Guid? CurrentInstitutionId => currentTenant.InstitutionId;
