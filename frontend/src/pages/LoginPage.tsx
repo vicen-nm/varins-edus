@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { Navigate, useNavigate } from 'react-router';
+import { Link, Navigate, useNavigate } from 'react-router';
 import { errorMessage } from '../api/errors';
 import { useAuth } from '../auth/useAuth';
 
@@ -67,6 +67,12 @@ export function LoginPage() {
         <button type="submit" disabled={busy}>
           {busy ? 'Entrando…' : 'Entrar'}
         </button>
+        
+      <p className="hint">
+        <Link to="/reset-password" className="link">
+          ¿Olvidaste tu contraseña?
+        </Link>
+      </p>
       </form>
     </main>
   );
