@@ -1,7 +1,8 @@
 import { ApiError } from './client';
 
 const messages: Record<string, string> = {
-  invalid_credentials: 'Usuario o contraseña incorrectos.',
+    invalid_credentials:
+    'Usuario o contraseña incorrectos. Tras varios intentos fallidos la cuenta se bloquea 15 minutos.',
   missing_credentials: 'Escribe tu usuario y tu contraseña.',
   tenant_violation: 'No tienes permiso para acceder a esta información.',
   network_error: 'No se pudo conectar con el servidor. Revisa tu conexión.',
@@ -12,8 +13,8 @@ const messages: Record<string, string> = {
   platform_user_has_no_institution: 'Los usuarios de plataforma no pertenecen a una institución.',
   activation_failed:
     'No pudimos activar tu cuenta con esos datos. Revisa tu cédula y tu código, o pide uno nuevo en tu colegio.',
-  weak_password:
-    'La contraseña es muy débil. Usa al menos 8 caracteres, sin tu cédula ni claves comunes como 12345678.',
+    weak_password:
+    'La contraseña es muy débil. Usa al menos 8 caracteres (10 si eres personal), sin tu usuario o cédula ni claves comunes como 12345678.',
   student_has_account: 'Este estudiante ya activó su cuenta y no necesita un código.',
   file_required: 'Elige un archivo de Excel.',
   file_too_large: 'El archivo no puede pesar más de 5 MB.',
@@ -46,6 +47,18 @@ const messages: Record<string, string> = {
   invalid_date_range: 'La fecha inicial no puede ser posterior a la final.',
   range_too_long: 'El rango no puede pasar de 92 días.',
   report_too_large: 'El reporte tiene demasiados registros. Elige un rango más corto.',
+    reset_failed:
+    'No pudimos cambiar la contraseña con esos datos. Revisa tu usuario y el código, o pide uno nuevo en tu colegio.',
+  invalid_current_password: 'La contraseña actual no es correcta.',
+  password_change_failed: 'No se pudo cambiar la contraseña. Inicia sesión de nuevo.',
+  invalid_username: 'El usuario no es válido: usa de 3 a 40 letras minúsculas, números, punto, guion o guion bajo.',
+  invalid_role: 'El rol no es válido.',
+  username_taken: 'Ya existe una cuenta con ese usuario.',
+  user_not_found: 'No se encontró la cuenta.',
+  user_inactive: 'La cuenta está desactivada. Actívala para generar un código.',
+  not_staff: 'Los roles solo se cambian en cuentas del personal.',
+  last_admin: 'No puedes dejar al colegio sin administradores.',
+  cannot_modify_self: 'No puedes cambiar tu propia cuenta desde aquí.',
   too_many_requests: 'Demasiados intentos. Espera un momento y vuelve a intentarlo.',
   http_401: 'Tu sesión venció. Inicia sesión de nuevo.',
   http_403: 'No tienes permiso para realizar esta acción.',

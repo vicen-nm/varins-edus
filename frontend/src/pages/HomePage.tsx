@@ -24,6 +24,7 @@ export function HomePage() {
       links: [
         { to: '/card', label: 'Mi carné', visible: inInstitution },
         { to: '/access/scan', label: 'Registrar mi comida (escanear QR)', visible: inInstitution },
+        { to: '/settings/password', label: 'Cambiar mi contraseña', visible: true },
       ],
     },
     {
@@ -47,6 +48,7 @@ export function HomePage() {
       links: [
         { to: '/settings/branding', label: 'Identidad de la institución', visible: can('branding.manage') },
         { to: '/access/points', label: 'Puntos de acceso y horarios', visible: can('access.manage') },
+        { to: '/users', label: 'Cuentas y contraseñas', visible: can('users.manage') },
       ],
     },
   ]

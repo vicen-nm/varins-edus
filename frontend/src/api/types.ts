@@ -177,3 +177,31 @@ export type AccessReport = {
   byDay: ReportDayRow[];
   byGroup: ReportGroupRow[];
 };
+
+export type UserItem = {
+  id: string;
+  username: string;
+  isActive: boolean;
+  isStudent: boolean;
+  roles: string[];
+  createdAt: string;
+  lastLoginAt: string | null;
+  isLocked: boolean;
+};
+
+export type UserList = {
+  total: number;
+  items: UserItem[];
+};
+
+export type RoleItem = {
+  key: string;
+  name: string;
+};
+
+export type IssuedResetCode = {
+  userId: string;
+  username: string;
+  code: string;
+  expiresAt: string;
+};
