@@ -1,15 +1,29 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { UNAUTHORIZED_EVENT, apiFetch } from '../api/client';
+import {
+  SESSION_RENEWED_EVENT,
+  UNAUTHORIZED_EVENT,
+  apiFetch,
+  renewSession,
+  serverLogout,
+} from '../api/client';
 import type { LoginResponse } from '../api/types';
 import { AuthContext } from './authContext';
 import type { ActivationInput, AuthContextValue } from './authContext';
+import { refreshDelayMs } from './refreshSchedule';
 import { clearSession, loadSession, saveSession } from './session';
+
+const RETRY_AFTER_NETWORK_ERROR_MS = 30_000;
+const WAKE_UP_MARGIN_MS = 60_000;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<LoginResponse | null>(() => loadSession());
 
+  // With no session in this tab, the browser may still hold a renewal cookie: ask before showing the login.
+  const [ready, setReady] = useState(() => session !== null);
+
   const logout = useCallback(() => {
+    void serverLogout();
     clearSession();
     setSession(null);
   }, []);
@@ -20,10 +34,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(
-    async (username: string, password: string) => {
+    async (username: string, password: string, remember = false) => {
       const result = await apiFetch<LoginResponse>('/api/auth/login', {
         method: 'POST',
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password, remember }),
       });
 
       startSession(result);
@@ -44,27 +58,90 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [startSession],
   );
 
-  // The API rejected our token: close the session.
+  // The session was renewed (here or by a request), or it cannot be renewed any more.
   useEffect(() => {
+    const handleRenewed = (event: Event) => setSession((event as CustomEvent<LoginResponse>).detail);
+
+    window.addEventListener(SESSION_RENEWED_EVENT, handleRenewed);
     window.addEventListener(UNAUTHORIZED_EVENT, logout);
-    return () => window.removeEventListener(UNAUTHORIZED_EVENT, logout);
+
+    return () => {
+      window.removeEventListener(SESSION_RENEWED_EVENT, handleRenewed);
+      window.removeEventListener(UNAUTHORIZED_EVENT, logout);
+    };
   }, [logout]);
 
-  // Close the session when the token expires.
+  // First load without a session in this tab: restore it from the cookie, if there is one.
+  useEffect(() => {
+    if (ready) {
+      return;
+    }
+
+    let cancelled = false;
+
+    void renewSession().then((result) => {
+      if (cancelled) {
+        return;
+      }
+
+      if (result.ok) {
+        setSession(result.session);
+      }
+
+      setReady(true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [ready]);
+
+  // Renew before the token expires. A renewed session restarts this effect with the new expiry.
   useEffect(() => {
     if (!session) {
       return;
     }
 
-    const remaining = new Date(session.expiresAt).getTime() - Date.now();
-    const timer = window.setTimeout(logout, Math.max(remaining, 0));
+    const expiresAt = new Date(session.expiresAt).getTime();
+    let cancelled = false;
+    let timer: number | undefined;
 
-    return () => window.clearTimeout(timer);
+    async function renew() {
+      const result = await renewSession();
+
+      if (cancelled || result.ok) {
+        return;
+      }
+
+      if (result.reason === 'ended') {
+        logout();
+      } else {
+        timer = window.setTimeout(renew, RETRY_AFTER_NETWORK_ERROR_MS);
+      }
+    }
+
+    timer = window.setTimeout(renew, refreshDelayMs(session.expiresAt, Date.now()));
+
+    // A sleeping computer freezes the timers: renew right away when the page wakes up with an old token.
+    function handleVisibility() {
+      if (!document.hidden && expiresAt - Date.now() < WAKE_UP_MARGIN_MS) {
+        window.clearTimeout(timer);
+        void renew();
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, [session, logout]);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ user: session?.user ?? null, login, activate, logout }),
-    [session, login, activate, logout],
+    () => ({ user: session?.user ?? null, ready, login, activate, logout }),
+    [session, ready, login, activate, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

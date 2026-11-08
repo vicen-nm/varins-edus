@@ -30,3 +30,15 @@ export function saveSession(session: LoginResponse): void {
 export function clearSession(): void {
   sessionStorage.removeItem(KEY);
 }
+
+
+// The stored token even if it already expired: the server decides, and its 401 triggers the renewal.
+export function storedToken(): string | null {
+  try {
+    const raw = sessionStorage.getItem(KEY);
+
+    return raw ? (JSON.parse(raw) as LoginResponse).accessToken : null;
+  } catch {
+    return null;
+  }
+}

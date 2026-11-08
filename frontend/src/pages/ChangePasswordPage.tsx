@@ -33,7 +33,7 @@ export function ChangePasswordPage() {
       setCurrent('');
       setPassword('');
       setConfirm('');
-      setMessage('Contraseña cambiada.');
+      setMessage('Contraseña cambiada. Cerramos tus sesiones en otros dispositivos.');
     } catch (e) {
       setError(errorMessage(e));
     } finally {

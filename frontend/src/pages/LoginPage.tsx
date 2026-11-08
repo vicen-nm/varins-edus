@@ -5,12 +5,18 @@ import { errorMessage } from '../api/errors';
 import { useAuth } from '../auth/useAuth';
 
 export function LoginPage() {
-  const { user, login } = useAuth();
+  const { user, ready, login } = useAuth();
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [remember, setRemember] = useState(false);
+
+    // Wait while the app checks whether the browser still has a session.
+  if (!ready) {
+    return null;
+  }
 
   if (user) {
     return <Navigate to="/" replace />;
@@ -22,7 +28,7 @@ export function LoginPage() {
     setBusy(true);
 
     try {
-      await login(username, password);
+      await login(username, password, remember);
       navigate('/', { replace: true });
     } catch (e) {
       setError(errorMessage(e));
@@ -57,6 +63,17 @@ export function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
+
+        <label className="check" htmlFor="remember">
+          <input
+            id="remember"
+            type="checkbox"
+            checked={remember}
+            onChange={(e) => setRemember(e.target.checked)}
+          />
+          Mantener la sesión iniciada en este dispositivo
+        </label>
+        <p className="hint">No lo marques en computadoras compartidas.</p>
 
         {error && (
           <p role="alert" className="error">
