@@ -9,6 +9,7 @@ public static class RateLimitSetup
     public const string AnonymousAuthPolicy = "anonymous-auth";
     public const string CardPolicy = "card";
     public const string CheckInPolicy = "check-in";
+    public const string RefreshPolicy = "refresh";
 
     // Many students share the school's single public IP, so this only stops floods.
     // Guessing codes and passwords is stopped by per-code and per-account limits instead.
@@ -17,6 +18,9 @@ public static class RateLimitSetup
     // Per signed-in user: the card renews itself every 25 s, and nobody needs many check-in attempts.
     private const int CardPermitsPerMinute = 30;
     private const int CheckInPermitsPerMinute = 10;
+
+    // Per IP, and high on purpose: a whole school behind one address renews its sessions every few minutes.
+    private const int RefreshPermitsPerMinute = 600;
 
     // Each person gets their own counter. Without a session the IP is used.
     public static string PartitionKey(string? userId, string? ipAddress) =>
@@ -37,7 +41,15 @@ public static class RateLimitSetup
                         Window = TimeSpan.FromMinutes(1),
                         QueueLimit = 0
                     }));
-
+            options.AddPolicy(RefreshPolicy, httpContext =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = RefreshPermitsPerMinute,
+                    Window = TimeSpan.FromMinutes(1),
+                    QueueLimit = 0
+                }));
             AddUserPolicy(options, CardPolicy, CardPermitsPerMinute);
             AddUserPolicy(options, CheckInPolicy, CheckInPermitsPerMinute);
 
@@ -67,6 +79,8 @@ public static class RateLimitSetup
 
         return services;
     }
+
+
 
     // Needs the user to be known, so UseRateLimiter must run after UseAuthentication.
     private static void AddUserPolicy(RateLimiterOptions options, string name, int permitsPerMinute) =>

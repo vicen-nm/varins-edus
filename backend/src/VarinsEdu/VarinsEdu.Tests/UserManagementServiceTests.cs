@@ -4,6 +4,7 @@ using VarinsEdu.Domain.Constants;
 using VarinsEdu.Domain.Entities;
 using VarinsEdu.Domain.Exceptions;
 using VarinsEdu.Infrastructure.Accounts;
+using VarinsEdu.Infrastructure.Auditing;
 using VarinsEdu.Infrastructure.Persistence;
 using VarinsEdu.Infrastructure.Security;
 using VarinsEdu.Infrastructure.Seeding;
@@ -296,5 +297,31 @@ public class UserManagementServiceTests
         await Assert.ThrowsAsync<TenantViolationException>(() => service.ListAsync(null, null, 0, 50));
         await Assert.ThrowsAsync<TenantViolationException>(() => service.CreateStaffAsync(new("maria.perez", RoleKeys.Teacher)));
         await Assert.ThrowsAsync<TenantViolationException>(() => service.IssueResetCodeAsync(Guid.NewGuid()));
+    }
+
+
+    [Fact]
+    public async Task Deactivating_an_account_closes_its_sessions()
+    {
+        var s = await SeedAsync();
+
+        var sessions = new RefreshTokenService(
+            s.Options,
+            new RefreshTokenHasher(new string('k', 48)),
+            new SessionPolicy(),
+            new FakeUser(null),
+            new AuditSuppression(),
+            TimeProvider.System);
+
+        await sessions.StartAsync(new AuthenticatedUser(s.TeacherId, "pedro@demo-a", s.InstitutionId, []), false);
+        await sessions.StartAsync(new AuthenticatedUser(s.AdminId, "demo.a.admin", s.InstitutionId, []), false);
+
+        Assert.Null((await ServiceFor(s.Options, s.InstitutionId, s.AdminId).SetActiveAsync(s.TeacherId, false)).Error);
+
+        using var db = Reader(s.Options);
+        var rows = await db.RefreshTokens.ToListAsync();
+
+        Assert.NotNull(rows.Single(r => r.UserId == s.TeacherId).RevokedAt);
+        Assert.Null(rows.Single(r => r.UserId == s.AdminId).RevokedAt);
     }
 }

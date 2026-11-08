@@ -23,7 +23,8 @@ public sealed record PasswordResult(PasswordError Error)
 
 public sealed record ResetPasswordCommand(string Username, string Code, string NewPassword);
 
-public sealed record ChangePasswordCommand(string CurrentPassword, string NewPassword);
+// KeepSessionToken: the renewal cookie of this browser. Its session survives the change; the others end.
+public sealed record ChangePasswordCommand(string CurrentPassword, string NewPassword, string? KeepSessionToken = null);
 
 // Choosing a new password: with a one-time code (forgotten password, new account) or knowing the current one.
 public class PasswordService(
@@ -32,7 +33,8 @@ public class PasswordService(
     ICurrentUser currentUser,
     IPasswordHasher passwordHasher,
     ResetCodeHasher codeHasher,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    RefreshTokenHasher refreshHasher)
 {
     public const int MaxFailedCodeAttempts = 5;
     public static readonly TimeSpan CodeLifetime = TimeSpan.FromHours(24);
@@ -132,6 +134,9 @@ public class PasswordService(
         LoginPolicy.Clear(user);
         code.UsedAt = now;
 
+        // Whoever knew the old password must not keep a session.
+        await RefreshTokenService.RevokeAllAsync(scoped, user.Id, now, null, ct);
+
         scoped.AuditLogs.Add(new AuditLog
         {
             InstitutionId = institutionId,
@@ -190,6 +195,21 @@ public class PasswordService(
 
         user.PasswordHash = passwordHasher.Hash(newPassword);
         LoginPolicy.Clear(user);
+
+        // The other devices end their sessions; this browser keeps its own.
+        Guid? keepFamily = null;
+
+        if (!string.IsNullOrWhiteSpace(command.KeepSessionToken))
+        {
+            var keepHash = refreshHasher.Hash(command.KeepSessionToken);
+
+            keepFamily = await db.RefreshTokens
+                .Where(t => t.TokenHash == keepHash && t.UserId == user.Id)
+                .Select(t => (Guid?)t.FamilyId)
+                .FirstOrDefaultAsync(ct);
+        }
+
+        await RefreshTokenService.RevokeAllAsync(db, user.Id, now, keepFamily, ct);
         await db.SaveChangesAsync(ct);
 
         return new PasswordResult(PasswordError.None);
