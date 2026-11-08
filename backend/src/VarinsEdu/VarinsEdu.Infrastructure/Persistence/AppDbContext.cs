@@ -28,6 +28,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentTenant
     public DbSet<AccessService> AccessServices => Set<AccessService>();
     public DbSet<AccessEvent> AccessEvents => Set<AccessEvent>();
     public DbSet<PasswordResetCode> PasswordResetCodes => Set<PasswordResetCode>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     // The query filters read these two properties every time a query runs.
     private Guid? CurrentInstitutionId => currentTenant.InstitutionId;
@@ -62,6 +63,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentTenant
             IgnoreTenantFilter || (CurrentInstitutionId != null && e.InstitutionId == CurrentInstitutionId));
 
         modelBuilder.Entity<AuditLog>().HasQueryFilter(e =>
+            IgnoreTenantFilter || (CurrentInstitutionId != null && e.InstitutionId == CurrentInstitutionId));
+
+        modelBuilder.Entity<RefreshToken>().HasQueryFilter(e =>
             IgnoreTenantFilter || (CurrentInstitutionId != null && e.InstitutionId == CurrentInstitutionId));
 
         // 3) Child and join entities follow their parent.

@@ -16,6 +16,14 @@ public class AuthService(
     DbContextOptions<AppDbContext> options,
     AuditSuppression auditSuppression)
 {
+    // The permissions of a user, from all their roles.
+    public static List<string> PermissionsOf(User user) => user.UserRoles
+        .SelectMany(ur => ur.Role.RolePermissions)
+        .Select(rp => rp.PermissionKey)
+        .Distinct()
+        .Order()
+        .ToList();
+
     // Returns null for any failure, so callers cannot tell why (prevents user enumeration).
     // The exact reason is only written to the audit log.
     public async Task<AuthenticatedUser?> ValidateCredentialsAsync(
@@ -82,12 +90,7 @@ public class AuthService(
             }
         }
 
-        var permissions = user.UserRoles
-            .SelectMany(ur => ur.Role.RolePermissions)
-            .Select(rp => rp.PermissionKey)
-            .Distinct()
-            .Order()
-            .ToList();
+        var permissions = PermissionsOf(user);
 
         await UpdateUserAsync(
             user,

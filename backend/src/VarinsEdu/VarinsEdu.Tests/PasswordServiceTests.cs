@@ -4,6 +4,7 @@ using VarinsEdu.Domain.Entities;
 using VarinsEdu.Infrastructure.Persistence;
 using VarinsEdu.Infrastructure.Security;
 using VarinsEdu.Infrastructure.Seeding;
+using VarinsEdu.Infrastructure.Auditing;
 using Xunit;
 
 namespace VarinsEdu.Tests;
@@ -19,7 +20,7 @@ public class PasswordServiceTests
     private static readonly DateTimeOffset Start = new(2026, 11, 4, 12, 0, 0, TimeSpan.Zero);
     private static readonly PasswordHasherService Hasher = new();
     private static readonly ResetCodeHasher ResetHasher = new(new string('k', 48));
-
+    private static readonly RefreshTokenHasher RefreshHasher = new(new string('k', 48));
     private sealed class FakeClock(DateTimeOffset now) : TimeProvider
     {
         public DateTimeOffset Now { get; set; } = now;
@@ -114,7 +115,11 @@ public class PasswordServiceTests
             new FakeUser(userId),
             Hasher,
             ResetHasher,
-            w.Clock);
+            w.Clock,
+            RefreshHasher);
+
+    private static RefreshTokenService Sessions(World w) =>
+        new(w.Options, RefreshHasher, new SessionPolicy(), new FakeUser(null), new AuditSuppression(), w.Clock);
 
     private static AppDbContext Reader(World w) => new(w.Options, new PlatformTenant());
 
@@ -269,5 +274,48 @@ public class PasswordServiceTests
 
         Assert.Equal(Start + LoginPolicy.LockDuration, student.LockedUntil);
         Assert.True(Hasher.Verify(student.PasswordHash, OldPassword));
+    }
+
+
+    [Fact]
+    public async Task Resetting_the_password_closes_every_session_of_the_account()
+    {
+        var w = await SeedAsync();
+        var sessions = Sessions(w);
+        var user = new AuthenticatedUser(w.StaffId, "pedro@demo-a", w.InstitutionId, []);
+
+        await sessions.StartAsync(user, persistent: false);
+        await sessions.StartAsync(user, persistent: true);
+
+        Assert.True((await ServiceFor(w).ResetAsync(Reset("pedro@demo-a", StaffCode))).Succeeded);
+
+        using var db = Reader(w);
+        var rows = await db.RefreshTokens.Where(t => t.UserId == w.StaffId).ToListAsync();
+
+        Assert.Equal(2, rows.Count);
+        Assert.All(rows, r => Assert.NotNull(r.RevokedAt));
+    }
+
+    [Fact]
+    public async Task Changing_the_password_keeps_the_current_session_and_closes_the_others()
+    {
+        var w = await SeedAsync();
+        var sessions = Sessions(w);
+        var user = new AuthenticatedUser(w.StudentUserId, "111111111@demo-a", w.InstitutionId, []);
+
+        var current = await sessions.StartAsync(user, persistent: false);
+        var other = await sessions.StartAsync(user, persistent: false);
+
+        var result = await ServiceFor(w, w.StudentUserId)
+            .ChangeAsync(new ChangePasswordCommand(OldPassword, NewPassword, current.Token));
+
+        Assert.True(result.Succeeded);
+
+        using var db = Reader(w);
+        var kept = await db.RefreshTokens.SingleAsync(t => t.TokenHash == RefreshHasher.Hash(current.Token));
+        var closed = await db.RefreshTokens.SingleAsync(t => t.TokenHash == RefreshHasher.Hash(other.Token));
+
+        Assert.Null(kept.RevokedAt);
+        Assert.NotNull(closed.RevokedAt);
     }
 }

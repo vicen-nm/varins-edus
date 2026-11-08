@@ -248,6 +248,13 @@ public class UserManagementService(
         }
 
         user.IsActive = active;
+
+        // Deactivating an account also ends its renewable sessions.
+        if (!active)
+        {
+            await RefreshTokenService.RevokeAllAsync(db, userId, time.GetUtcNow(), null, ct);
+        }
+
         await db.SaveChangesAsync(ct);
 
         return Outcome<bool>.Ok(true);
