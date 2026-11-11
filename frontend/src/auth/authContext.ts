@@ -16,6 +16,7 @@ export type AuthContextValue = {
 
   login: (username: string, password: string, remember?: boolean) => Promise<void>;
   activate: (input: ActivationInput) => Promise<void>;
+  pairDevice: (username: string, code: string) => Promise<void>;
   logout: () => void;
 };
 

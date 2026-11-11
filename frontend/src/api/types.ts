@@ -3,6 +3,7 @@ export type UserInfo = {
   username: string;
   institutionId: string | null;
   isPlatform: boolean;
+  isDevice?: boolean;
   permissions: string[];
 };
 
@@ -183,6 +184,7 @@ export type UserItem = {
   username: string;
   isActive: boolean;
   isStudent: boolean;
+  isDevice?: boolean;
   roles: string[];
   createdAt: string;
   lastLoginAt: string | null;

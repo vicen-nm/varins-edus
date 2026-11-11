@@ -1,4 +1,4 @@
-import { Link } from 'react-router';
+import { Link, Navigate } from 'react-router';
 import { useAuth } from '../auth/useAuth';
 import { useInstitution } from '../institution/useInstitution';
 
@@ -10,6 +10,11 @@ export function HomePage() {
 
   if (!user) {
     return null;
+  }
+
+  // A paired screen only shows the cafeteria QR.
+  if (user.isDevice) {
+    return <Navigate to="/access/screen" replace />;
   }
 
   const institutionName = institution?.settings?.displayName || institution?.name;
@@ -30,7 +35,7 @@ export function HomePage() {
     {
       title: 'Comedor',
       links: [
-        { to: '/access/screen', label: 'Pantalla del comedor', visible: can('access.scan') },
+        { to: '/access/screen', label: 'Pantalla del comedor', visible: can('access.display') },
         { to: '/access/manual', label: 'Registro manual', visible: can('access.scan') },
         { to: '/access/events', label: 'Registros de acceso', visible: can('access.view') },
         { to: '/access/report', label: 'Reporte del comedor', visible: can('access.view') },
@@ -49,6 +54,7 @@ export function HomePage() {
         { to: '/settings/branding', label: 'Identidad de la institución', visible: can('branding.manage') },
         { to: '/access/points', label: 'Puntos de acceso y horarios', visible: can('access.manage') },
         { to: '/users', label: 'Cuentas y contraseñas', visible: can('users.manage') },
+        { to: '/devices', label: 'Pantallas del comedor (dispositivos)', visible: can('users.manage') },
       ],
     },
   ]
