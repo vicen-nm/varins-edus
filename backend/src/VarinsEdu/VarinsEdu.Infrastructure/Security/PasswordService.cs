@@ -39,7 +39,7 @@ public class PasswordService(
     public const int MaxFailedCodeAttempts = 5;
     public static readonly TimeSpan CodeLifetime = TimeSpan.FromHours(24);
 
-    private sealed record Found(Guid Id, Guid? InstitutionId);
+    private sealed record Found(Guid Id, Guid? InstitutionId, bool IsDevice);
 
     public async Task<PasswordResult> ResetAsync(ResetPasswordCommand command, CancellationToken ct = default)
     {
@@ -68,13 +68,19 @@ public class PasswordService(
                 .IgnoreQueryFilters()
                 .AsNoTracking()
                 .Where(u => u.Username == username)
-                .Select(u => new Found(u.Id, u.InstitutionId))
+                .Select(u => new Found(u.Id, u.InstitutionId, u.IsDevice))
                 .FirstOrDefaultAsync(ct);
         }
 
         if (found is null)
         {
             return await FailAsync(null, null, "unknown_user", ct);
+        }
+
+        // Devices have no password: they are paired, not reset.
+        if (found.IsDevice)
+        {
+            return await FailAsync(null, found.Id, "device_account", ct);
         }
 
         if (found.InstitutionId is not { } institutionId)

@@ -16,7 +16,8 @@ public class AuthController(
     StudentActivationService activationService,
     TokenService tokenService,
     PasswordService passwordService,
-    RefreshTokenService sessions) : ControllerBase
+    RefreshTokenService sessions,
+    DevicePairingService pairing) : ControllerBase
 {
     [HttpPost("login")]
     [AllowAnonymous]
@@ -121,6 +122,27 @@ public class AuthController(
         return NoContent();
     }
 
+    // A display device (the cafeteria screen) exchanges the one-time code for its own long session.
+    // Every problem answers the same way, so nobody can learn which devices exist.
+    [HttpPost("pair-device")]
+    [AllowAnonymous]
+    [EnableRateLimiting(RateLimitSetup.AnonymousAuthPolicy)]
+    public async Task<IActionResult> PairDevice(PairDeviceRequest request, CancellationToken ct)
+    {
+        Response.Headers.CacheControl = "no-store";
+
+        var result = await pairing.PairAsync(request.Username, request.Code, ct);
+
+        if (!result.Succeeded)
+        {
+            return this.ApiProblem(StatusCodes.Status400BadRequest, "pairing_failed", "The pairing data is not valid.");
+        }
+
+        SessionCookies.Set(Response, result.Session!);
+
+        return Ok(ToResponse(result.User!));
+    }
+
     // A person chooses a new password with the one-time code the school gave them.
     // Every problem with the code answers the same way, so nobody can learn who has an account.
     [HttpPost("reset-password")]
@@ -165,7 +187,7 @@ public class AuthController(
         return new LoginResponse(
             token,
             expiresAt,
-            new UserInfo(user.UserId, user.Username, user.InstitutionId, user.IsPlatform, user.Permissions));
+            new UserInfo(user.UserId, user.Username, user.InstitutionId, user.IsPlatform, user.Permissions, user.IsDevice));
     }
 }
 
@@ -178,7 +200,10 @@ public record UserInfo(
     string Username,
     Guid? InstitutionId,
     bool IsPlatform,
-    IReadOnlyCollection<string> Permissions);
+    IReadOnlyCollection<string> Permissions,
+    bool IsDevice = false);
+
+public record PairDeviceRequest(string Username, string Code);
 
 public record LoginResponse(string AccessToken, DateTimeOffset ExpiresAt, UserInfo User);
 

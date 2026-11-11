@@ -769,6 +769,10 @@ namespace VarinsEdu.Infrastructure.Persistence.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_active");
 
+                    b.Property<bool>("IsDevice")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_device");
+
                     b.Property<DateTimeOffset?>("LastLoginAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_login_at");

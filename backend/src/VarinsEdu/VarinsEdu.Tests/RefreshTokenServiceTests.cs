@@ -276,4 +276,39 @@ public class RefreshTokenServiceTests
         Assert.True(result.User!.IsPlatform);
         Assert.Equal(new[] { PermissionKeys.UsersManage }, result.User.Permissions);
     }
+
+
+    [Fact]
+    public async Task Display_device_sessions_last_longer_than_user_sessions()
+    {
+        var w = await SeedAsync();
+        var deviceId = Guid.Empty;
+
+        using (var db = Reader(w))
+        {
+            var device = NewUser(w.InstitutionId, "screen", true, null);
+            device.IsDevice = true;
+            db.Users.Add(device);
+            await db.SaveChangesAsync();
+            deviceId = device.Id;
+        }
+
+        var service = ServiceFor(w);
+        var session = await service.StartAsync(new AuthenticatedUser(deviceId, "screen", w.InstitutionId, [], IsDevice: true), persistent: true);
+
+        Assert.Equal(Start.AddDays(90), session.ExpiresAt);
+
+        // Used after 80 days: still alive, and renewed for another 90.
+        w.Clock.Now = Start.AddDays(80);
+        var renewed = await service.RefreshAsync(session.Token);
+
+        Assert.Equal(RefreshStatus.Ok, renewed.Status);
+        Assert.True(renewed.User!.IsDevice);
+        Assert.Equal(Start.AddDays(170), renewed.Session!.ExpiresAt);
+
+        // More than 90 days without use ends the session.
+        w.Clock.Now = Start.AddDays(80 + 91);
+
+        Assert.Equal(RefreshStatus.Invalid, (await service.RefreshAsync(renewed.Session.Token)).Status);
+    }
 }

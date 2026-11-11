@@ -318,4 +318,21 @@ public class PasswordServiceTests
         Assert.Null(kept.RevokedAt);
         Assert.NotNull(closed.RevokedAt);
     }
+
+    [Fact]
+    public async Task Display_devices_cannot_reset_a_password()
+    {
+        var w = await SeedAsync();
+
+        using (var db = Reader(w))
+        {
+            var device = NewUser(w.InstitutionId, "screen@demo-a");
+            device.IsDevice = true;
+            db.Users.Add(device);
+            db.PasswordResetCodes.Add(NewCode(w.InstitutionId, device.Id, StaffCode));
+            await db.SaveChangesAsync();
+        }
+
+        Assert.Equal(PasswordError.Failed, (await ServiceFor(w).ResetAsync(Reset("screen@demo-a", StaffCode))).Error);
+    }
 }

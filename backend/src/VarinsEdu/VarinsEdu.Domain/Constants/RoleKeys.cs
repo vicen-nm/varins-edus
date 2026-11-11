@@ -6,6 +6,7 @@ public static class RoleKeys
     public const string InstitutionAdmin = "institution_admin";
     public const string Teacher = "teacher";
     public const string CafeteriaStaff = "cafeteria_staff";
+    public const string CafeteriaDisplay = "cafeteria_display";
     public const string Student = "student";
 
     // The roles that can be given to staff accounts. Students get theirs when they activate.

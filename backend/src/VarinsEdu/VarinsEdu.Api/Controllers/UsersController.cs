@@ -33,6 +33,15 @@ public class UsersController(UserManagementService users) : ControllerBase
         return this.ToUserResult(await users.CreateStaffAsync(input, ct), StatusCodes.Status201Created);
     }
 
+    // A display screen (like the cafeteria's). The code pairs the device: shown ONCE, valid for 1 hour.
+    [HttpPost("devices")]
+    public async Task<IActionResult> CreateDevice([FromBody] CreateDeviceInput input, CancellationToken ct)
+    {
+        Response.Headers.CacheControl = "no-store";
+
+        return this.ToUserResult(await users.CreateDeviceAsync(input, ct), StatusCodes.Status201Created);
+    }
+
     [HttpPut("{id:guid}/roles")]
     public async Task<IActionResult> SetRoles(Guid id, [FromBody] RolesInput input, CancellationToken ct) =>
         this.ToNoContent(await users.SetRolesAsync(id, input.RoleKeys, ct));

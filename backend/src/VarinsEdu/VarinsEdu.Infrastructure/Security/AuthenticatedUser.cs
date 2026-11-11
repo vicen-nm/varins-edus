@@ -5,7 +5,8 @@ public sealed record AuthenticatedUser(
     Guid UserId,
     string Username,
     Guid? InstitutionId,
-    IReadOnlyCollection<string> Permissions)
+    IReadOnlyCollection<string> Permissions,
+    bool IsDevice = false)
 {
     // A user without an institution is a platform-level user.
     public bool IsPlatform => InstitutionId is null;
