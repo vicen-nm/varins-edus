@@ -104,6 +104,7 @@ builder.Services.AddScoped<UserManagementService>();
 builder.Services.AddSingleton(new RefreshTokenHasher(jwtOptions.Key));
 builder.Services.AddSingleton(new SessionPolicy(jwtOptions.RefreshIdleDays, jwtOptions.RefreshMaxDays));
 builder.Services.AddScoped<RefreshTokenService>();
+builder.Services.AddScoped<DevicePairingService>();
 
 // --- Seed data at startup ---
 builder.Services.AddSingleton(

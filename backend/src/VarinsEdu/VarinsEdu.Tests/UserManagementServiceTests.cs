@@ -324,4 +324,82 @@ public class UserManagementServiceTests
         Assert.NotNull(rows.Single(r => r.UserId == s.TeacherId).RevokedAt);
         Assert.Null(rows.Single(r => r.UserId == s.AdminId).RevokedAt);
     }
+
+
+    private static async Task AddDisplayRoleAsync(Scenario s)
+    {
+        using var db = Reader(s.Options);
+        db.Roles.Add(NewRole(s.InstitutionId, RoleKeys.CafeteriaDisplay, PermissionKeys.AccessDisplay));
+        await db.SaveChangesAsync();
+    }
+
+    [Fact]
+    public async Task A_display_screen_is_created_with_a_pairing_code()
+    {
+        var s = await SeedAsync();
+        await AddDisplayRoleAsync(s);
+        var service = ServiceFor(s.Options, s.InstitutionId, s.AdminId);
+
+        var result = await service.CreateDeviceAsync(new CreateDeviceInput(" Comedor-1 "));
+
+        Assert.Null(result.Error);
+        Assert.Equal("comedor-1@demo-a", result.Value!.Username);
+
+        using (var db = Reader(s.Options))
+        {
+            var user = await db.Users.SingleAsync(u => u.Username == "comedor-1@demo-a");
+
+            Assert.True(user.IsDevice);
+            Assert.Null(user.PersonId);
+
+            var roleKey = await db.UserRoles.Where(ur => ur.UserId == user.Id).Select(ur => ur.Role.Key).SingleAsync();
+            Assert.Equal(RoleKeys.CafeteriaDisplay, roleKey);
+
+            var row = await db.PasswordResetCodes.SingleAsync(c => c.UserId == user.Id);
+
+            Assert.True(ResetHasher.Verify(row.CodeHash, result.Value.Code));
+            Assert.True(row.ExpiresAt > DateTimeOffset.UtcNow.AddMinutes(30));
+            Assert.True(row.ExpiresAt < DateTimeOffset.UtcNow.AddHours(2));
+        }
+
+        Assert.Equal("invalid_username", (await service.CreateDeviceAsync(new CreateDeviceInput("a b"))).Error);
+        Assert.Equal("username_taken", (await service.CreateDeviceAsync(new CreateDeviceInput("COMEDOR-1"))).Error);
+    }
+
+    [Fact]
+    public async Task Display_screens_are_listed_apart_from_staff_and_their_roles_cannot_be_edited()
+    {
+        var s = await SeedAsync();
+        await AddDisplayRoleAsync(s);
+        var service = ServiceFor(s.Options, s.InstitutionId, s.AdminId);
+
+        var device = (await service.CreateDeviceAsync(new CreateDeviceInput("comedor-1"))).Value!;
+
+        var staff = await service.ListAsync(null, null, 0, 50);
+        var devices = await service.ListAsync("device", null, 0, 50);
+        var all = await service.ListAsync("all", null, 0, 50);
+
+        Assert.DoesNotContain(staff.Items, i => i.IsDevice);
+        Assert.Equal(device.Username, Assert.Single(devices.Items).Username);
+        Assert.True(Assert.Single(devices.Items).IsDevice);
+        Assert.Contains(all.Items, i => i.IsDevice);
+
+        Assert.Equal("not_staff", (await service.SetRolesAsync(device.UserId, new[] { RoleKeys.Teacher })).Error);
+    }
+
+    [Fact]
+    public async Task A_new_code_for_a_screen_lasts_one_hour_and_one_for_staff_lasts_a_day()
+    {
+        var s = await SeedAsync();
+        await AddDisplayRoleAsync(s);
+        var service = ServiceFor(s.Options, s.InstitutionId, s.AdminId);
+
+        var device = (await service.CreateDeviceAsync(new CreateDeviceInput("comedor-1"))).Value!;
+
+        var forScreen = (await service.IssueResetCodeAsync(device.UserId)).Value!;
+        var forStaff = (await service.IssueResetCodeAsync(s.TeacherId)).Value!;
+
+        Assert.True(forScreen.ExpiresAt < DateTimeOffset.UtcNow.AddHours(2));
+        Assert.True(forStaff.ExpiresAt > DateTimeOffset.UtcNow.AddHours(23));
+    }
 }

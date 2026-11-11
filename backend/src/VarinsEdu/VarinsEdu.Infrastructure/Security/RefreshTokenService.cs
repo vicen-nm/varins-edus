@@ -11,7 +11,7 @@ using VarinsEdu.Infrastructure.Seeding;
 namespace VarinsEdu.Infrastructure.Security;
 
 // IdleDays: days without use before a session ends. MaxDays: the absolute limit since the sign-in.
-public sealed record SessionPolicy(int IdleDays = 7, int MaxDays = 30);
+public sealed record SessionPolicy(int IdleDays = 7, int MaxDays = 30, int DeviceIdleDays = 90, int DeviceMaxDays = 365);   
 
 public sealed record IssuedSession(string Token, DateTimeOffset ExpiresAt, bool Persistent);
 
@@ -50,7 +50,7 @@ public class RefreshTokenService(
 
         await using var db = new AppDbContext(options, ScopeOf(user.InstitutionId));
 
-        var session = Add(db, user.UserId, user.InstitutionId, Guid.NewGuid(), persistent, now, now);
+        var session = Add(db, user.UserId, user.InstitutionId, Guid.NewGuid(), persistent, now, now, user.IsDevice);
         await SaveAsync(db, ct);
 
         return session;
@@ -113,12 +113,12 @@ public class RefreshTokenService(
 
         current.UsedAt = now;
 
-        var session = Add(db, current.UserId, current.InstitutionId, current.FamilyId, current.Persistent, current.FamilyStartedAt, now);
+        var session = Add(db, current.UserId, current.InstitutionId, current.FamilyId, current.Persistent, current.FamilyStartedAt, now, user.IsDevice);
         await SaveAsync(db, ct);
 
         return new RefreshResult(
             RefreshStatus.Ok,
-            new AuthenticatedUser(user.Id, user.Username, user.InstitutionId, AuthService.PermissionsOf(user)),
+            new AuthenticatedUser(user.Id, user.Username, user.InstitutionId, AuthService.PermissionsOf(user), user.IsDevice),
             session);
     }
 
@@ -173,12 +173,13 @@ public class RefreshTokenService(
         Guid familyId,
         bool persistent,
         DateTimeOffset familyStartedAt,
-        DateTimeOffset now)
+        DateTimeOffset now,
+        bool device)
     {
         var token = Base64Url.EncodeToString(RandomNumberGenerator.GetBytes(32));
 
-        var idleLimit = now.AddDays(policy.IdleDays);
-        var absoluteLimit = familyStartedAt.AddDays(policy.MaxDays);
+        var idleLimit = now.AddDays(device ? policy.DeviceIdleDays : policy.IdleDays);
+        var absoluteLimit = familyStartedAt.AddDays(device ? policy.DeviceMaxDays : policy.MaxDays);
         var expiresAt = idleLimit < absoluteLimit ? idleLimit : absoluteLimit;
 
         db.RefreshTokens.Add(new RefreshToken

@@ -58,6 +58,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [startSession],
   );
 
+    // A display device exchanges the one-time code the school gave it for its own session.
+  const pairDevice = useCallback(
+    async (username: string, code: string) => {
+      const result = await apiFetch<LoginResponse>('/api/auth/pair-device', {
+        method: 'POST',
+        body: JSON.stringify({ username, code }),
+      });
+
+      startSession(result);
+    },
+    [startSession],
+  );
+  
   // The session was renewed (here or by a request), or it cannot be renewed any more.
   useEffect(() => {
     const handleRenewed = (event: Event) => setSession((event as CustomEvent<LoginResponse>).detail);
@@ -140,8 +153,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [session, logout]);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ user: session?.user ?? null, ready, login, activate, logout }),
-    [session, ready, login, activate, logout],
+    () => ({ user: session?.user ?? null, ready, login, activate, pairDevice, logout }),
+    [session, ready, login, activate, pairDevice, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

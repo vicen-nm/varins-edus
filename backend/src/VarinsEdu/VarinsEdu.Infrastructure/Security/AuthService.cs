@@ -56,6 +56,13 @@ public class AuthService(
 
         var now = timeProvider.GetUtcNow();
 
+        // Display devices have no password: they are paired with a one-time code.
+        if (user.IsDevice)
+        {
+            await RecordAsync("auth.login.failed", user, normalized, "device_account", ct);
+            return null;
+        }
+
         // A locked account refuses even the right password, and new attempts do not extend the lock.
         if (LoginPolicy.IsLocked(user, now))
         {

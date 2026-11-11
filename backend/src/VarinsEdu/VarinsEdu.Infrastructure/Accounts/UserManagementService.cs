@@ -10,7 +10,7 @@ using VarinsEdu.Infrastructure.Security;
 
 namespace VarinsEdu.Infrastructure.Accounts;
 
-// Accounts of an institution: staff creation, roles, activation and reset codes.
+// Accounts of an institution: staff and display devices, roles, activation and one-time codes.
 // Nobody ever chooses or learns another person's password: a one-time code is issued instead.
 public class UserManagementService(
     AppDbContext db,
@@ -21,7 +21,7 @@ public class UserManagementService(
     TimeProvider time)
 {
     // The tenant filter limits every query to the caller's institution (and hides platform users).
-    // kind: "staff" (default), "student" or "all".
+    // kind: "staff" (default), "student", "device" or "all".
     public async Task<UserPage> ListAsync(string? kind, string? search, int skip, int take, CancellationToken ct = default)
     {
         Require();
@@ -35,8 +35,9 @@ public class UserManagementService(
         query = kind switch
         {
             "student" => query.Where(u => u.PersonId != null),
+            "device" => query.Where(u => u.IsDevice),
             "all" => query,
-            _ => query.Where(u => u.PersonId == null)
+            _ => query.Where(u => u.PersonId == null && !u.IsDevice)
         };
 
         if (!string.IsNullOrWhiteSpace(search))
@@ -61,7 +62,8 @@ public class UserManagementService(
                 Roles = u.UserRoles.Select(ur => ur.Role.Key).OrderBy(k => k).ToList(),
                 u.CreatedAt,
                 u.LastLoginAt,
-                u.LockedUntil
+                u.LockedUntil,
+                u.IsDevice
             })
             .ToListAsync(ct);
 
@@ -74,7 +76,8 @@ public class UserManagementService(
                 r.Roles,
                 r.CreatedAt,
                 r.LastLoginAt,
-                r.LockedUntil is { } until && until > now))
+                r.LockedUntil is { } until && until > now,
+                r.IsDevice))
             .ToList();
 
         return new UserPage(total, items);
@@ -96,20 +99,35 @@ public class UserManagementService(
 
     public async Task<Outcome<IssuedResetCode>> CreateStaffAsync(CreateStaffInput input, CancellationToken ct = default)
     {
-        var institutionId = Require();
-
-        var name = StaffUsernames.Normalize(input.Username);
-
-        if (!StaffUsernames.IsValid(name))
-        {
-            return Outcome<IssuedResetCode>.Fail("invalid_username");
-        }
+        Require();
 
         var roleKey = input.RoleKey?.Trim();
 
         if (roleKey is null || !RoleKeys.StaffRoles.Contains(roleKey))
         {
             return Outcome<IssuedResetCode>.Fail("invalid_role");
+        }
+
+        return await CreateAccountAsync(input.Username, roleKey, isDevice: false, ct);
+    }
+
+    // A display screen (the cafeteria's): no password, it is paired with the one-time code.
+    public Task<Outcome<IssuedResetCode>> CreateDeviceAsync(CreateDeviceInput input, CancellationToken ct = default) =>
+        CreateAccountAsync(input.Name, RoleKeys.CafeteriaDisplay, isDevice: true, ct);
+
+    private async Task<Outcome<IssuedResetCode>> CreateAccountAsync(
+        string? usernameInput,
+        string roleKey,
+        bool isDevice,
+        CancellationToken ct)
+    {
+        var institutionId = Require();
+
+        var name = StaffUsernames.Normalize(usernameInput);
+
+        if (!StaffUsernames.IsValid(name))
+        {
+            return Outcome<IssuedResetCode>.Fail("invalid_username");
         }
 
         var role = await db.Roles.FirstOrDefaultAsync(r => r.Key == roleKey, ct);
@@ -140,12 +158,14 @@ public class UserManagementService(
             // Nobody knows this secret: the account can only be opened with the one-time code.
             PasswordHash = passwordHasher.Hash(Convert.ToHexString(RandomNumberGenerator.GetBytes(32))),
             IsActive = true,
+            IsDevice = isDevice,
             CreatedAt = now
         };
         user.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = role.Id });
 
         var row = new PasswordResetCode { Id = Guid.NewGuid(), InstitutionId = institutionId, UserId = user.Id };
-        var (code, expiresAt) = SetCode(row, now);
+        var lifetime = isDevice ? DevicePairingService.CodeLifetime : PasswordService.CodeLifetime;
+        var (code, expiresAt) = SetCode(row, now, lifetime);
 
         db.Users.Add(user);
         db.PasswordResetCodes.Add(row);
@@ -163,7 +183,7 @@ public class UserManagementService(
         return Outcome<IssuedResetCode>.Ok(new IssuedResetCode(user.Id, username, code, expiresAt));
     }
 
-    // Replaces the roles of a staff account.
+    // Replaces the roles of a staff account. Students and display devices have fixed roles.
     public async Task<Outcome<bool>> SetRolesAsync(Guid userId, IReadOnlyList<string>? roleKeys, CancellationToken ct = default)
     {
         Require();
@@ -187,7 +207,7 @@ public class UserManagementService(
             return Outcome<bool>.Fail("user_not_found");
         }
 
-        if (user.PersonId is not null)
+        if (user.PersonId is not null || user.IsDevice)
         {
             return Outcome<bool>.Fail("not_staff");
         }
@@ -260,7 +280,7 @@ public class UserManagementService(
         return Outcome<bool>.Ok(true);
     }
 
-    // Issues a new one-time code (new account, forgotten password) and invalidates the old one.
+    // Issues a new one-time code (new account, forgotten password, a screen to pair) and invalidates the old one.
     public async Task<Outcome<IssuedResetCode>> IssueResetCodeAsync(Guid userId, CancellationToken ct = default)
     {
         var institutionId = Require();
@@ -290,7 +310,8 @@ public class UserManagementService(
             db.PasswordResetCodes.Add(row);
         }
 
-        var (code, expiresAt) = SetCode(row, time.GetUtcNow());
+        var lifetime = user.IsDevice ? DevicePairingService.CodeLifetime : PasswordService.CodeLifetime;
+        var (code, expiresAt) = SetCode(row, time.GetUtcNow(), lifetime);
 
         await db.SaveChangesAsync(ct);
 
@@ -298,12 +319,12 @@ public class UserManagementService(
     }
 
     // One code per person: reusing the row replaces the old fingerprint.
-    private (string Code, DateTimeOffset ExpiresAt) SetCode(PasswordResetCode row, DateTimeOffset now)
+    private (string Code, DateTimeOffset ExpiresAt) SetCode(PasswordResetCode row, DateTimeOffset now, TimeSpan lifetime)
     {
         var code = ActivationCodeGenerator.Generate();
 
         row.CodeHash = codeHasher.Hash(code);
-        row.ExpiresAt = now.Add(PasswordService.CodeLifetime);
+        row.ExpiresAt = now.Add(lifetime);
         row.UsedAt = null;
         row.FailedAttempts = 0;
         row.CreatedAt = now;

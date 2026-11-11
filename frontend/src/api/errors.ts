@@ -60,6 +60,7 @@ const messages: Record<string, string> = {
   last_admin: 'No puedes dejar al colegio sin administradores.',
   cannot_modify_self: 'No puedes cambiar tu propia cuenta desde aquí.',
   session_expired: 'Tu sesión venció. Inicia sesión de nuevo.',
+  pairing_failed: 'No pudimos emparejar la pantalla con esos datos. Revisa el usuario y el código, o genera uno nuevo.',
   too_many_requests: 'Demasiados intentos. Espera un momento y vuelve a intentarlo.',
   http_401: 'Tu sesión venció. Inicia sesión de nuevo.',
   http_403: 'No tienes permiso para realizar esta acción.',

@@ -299,7 +299,7 @@ export function UsersPage() {
                       <td>
                         <code>{u.username}</code>
                       </td>
-                      <td>{u.isStudent ? 'Estudiante' : 'Personal'}</td>
+                      <td>{u.isStudent ? 'Estudiante' : u.isDevice ? 'Pantalla' : 'Personal'}</td>
                       <td>{u.roles.map(roleLabel).join(', ') || '—'}</td>
                       <td>{!u.isActive ? 'Inactivo' : u.isLocked ? 'Bloqueado (temporal)' : 'Activo'}</td>
                       <td>{u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString('es-CR') : 'Nunca'}</td>
@@ -308,14 +308,14 @@ export function UsersPage() {
                           <span className="hint">Tu cuenta</span>
                         ) : (
                           <div className="actions">
-                            {!u.isStudent && (
+                            {!u.isStudent && !u.isDevice && (
                               <button type="button" className="secondary" onClick={() => setEditing(u)}>
                                 Roles
                               </button>
                             )}
                             <button
                               type="button"
-                              disabled={busyId === u.id || !u.isActive}
+                              disabled={busyId === u.id || !u.isActive || u.isDevice}
                               onClick={() => handleReset(u)}
                             >
                               {busyId === u.id ? 'Generando…' : 'Nuevo código'}

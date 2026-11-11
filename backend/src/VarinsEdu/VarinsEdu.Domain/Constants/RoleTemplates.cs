@@ -9,7 +9,11 @@ public static class RoleTemplates
     [
         new(RoleKeys.InstitutionAdmin, "Institution administrator", PermissionKeys.ForInstitutions),
         new(RoleKeys.Teacher, "Teacher", [PermissionKeys.StudentsView]),
-        new(RoleKeys.CafeteriaStaff, "Cafeteria staff", [PermissionKeys.AccessScan, PermissionKeys.AccessView]),
+        new(
+            RoleKeys.CafeteriaStaff,
+            "Cafeteria staff",
+            [PermissionKeys.AccessScan, PermissionKeys.AccessView, PermissionKeys.AccessDisplay]),
+        new(RoleKeys.CafeteriaDisplay, "Cafeteria display screen", [PermissionKeys.AccessDisplay]),
         new(RoleKeys.Student, "Student", [])
     ];
 }

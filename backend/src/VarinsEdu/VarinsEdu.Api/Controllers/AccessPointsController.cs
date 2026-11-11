@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VarinsEdu.Api.Errors;
+using VarinsEdu.Api.Security;
 using VarinsEdu.Domain.Constants;
 using VarinsEdu.Infrastructure.Access;
 
@@ -10,8 +11,9 @@ namespace VarinsEdu.Api.Controllers;
 [Route("api/access-points")]
 public class AccessPointsController(AccessPointService points) : ControllerBase
 {
+    // Staff who register manually and display screens both need to read the points.
     [HttpGet]
-    [Authorize(Policy = PermissionKeys.AccessScan)]
+    [Authorize(Policy = PermissionPolicies.AccessPointsRead)]
     public async Task<IActionResult> List(CancellationToken ct) => Ok(await points.ListAsync(ct));
 
     [HttpPost]
@@ -44,8 +46,9 @@ public class AccessPointsController(AccessPointService points) : ControllerBase
         this.ToResult(await points.UpdateServiceAsync(id, serviceId, input, ct));
 
     // The point's screen asks for this every few seconds. The token is a short-lived credential.
+    // Only a display permission is needed: a screen must not be able to register people.
     [HttpGet("{id:guid}/qr")]
-    [Authorize(Policy = PermissionKeys.AccessScan)]
+    [Authorize(Policy = PermissionKeys.AccessDisplay)]
     public async Task<IActionResult> Qr(Guid id, CancellationToken ct)
     {
         Response.Headers.CacheControl = "no-store";

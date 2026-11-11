@@ -18,6 +18,8 @@ import { AccessReportPage } from './pages/AccessReportPage';
 import { ChangePasswordPage } from './pages/ChangePasswordPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { UsersPage } from './pages/UsersPage';
+import { DevicesPage } from './pages/DevicesPage';
+import { PairDevicePage } from './pages/PairDevicePage';
 
 export default function App() {
   return (
@@ -26,11 +28,13 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/activar/:slug" element={<ActivatePage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/emparejar" element={<PairDevicePage />} />
         <Route element={<RequireAuth />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/settings/branding" element={<BrandingPage />} />
           <Route path="/students" element={<StudentsPage />} />
           <Route path="/users" element={<UsersPage />} />
+          <Route path="/devices" element={<DevicesPage />} />
           <Route path="/settings/password" element={<ChangePasswordPage />} />
           <Route path="/students/import" element={<ImportStudentsPage />} />
           <Route path="/card" element={<CardPage />} />
