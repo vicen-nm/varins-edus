@@ -14,6 +14,7 @@ const ROLE_LABELS: Record<string, string> = {
   institution_admin: 'Administrador del colegio',
   teacher: 'Docente',
   cafeteria_staff: 'Personal de comedor',
+  gate_staff: 'Personal de portería',
   student: 'Estudiante',
 };
 

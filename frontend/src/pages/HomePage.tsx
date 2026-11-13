@@ -42,6 +42,10 @@ export function HomePage() {
       ],
     },
     {
+      title: 'Portería',
+      links: [{ to: '/cards/scan', label: 'Verificar carné (escanear)', visible: can('cards.scan') }],
+    },
+    {
       title: 'Estudiantes',
       links: [
         { to: '/students', label: 'Estudiantes', visible: can('students.view') },

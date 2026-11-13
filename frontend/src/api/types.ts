@@ -207,3 +207,9 @@ export type IssuedResetCode = {
   code: string;
   expiresAt: string;
 };
+
+export type ScannedStudent = {
+  firstName: string;
+  lastName: string;
+  group: string | null;
+};
