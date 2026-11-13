@@ -105,6 +105,7 @@ builder.Services.AddSingleton(new RefreshTokenHasher(jwtOptions.Key));
 builder.Services.AddSingleton(new SessionPolicy(jwtOptions.RefreshIdleDays, jwtOptions.RefreshMaxDays));
 builder.Services.AddScoped<RefreshTokenService>();
 builder.Services.AddScoped<DevicePairingService>();
+builder.Services.AddScoped<CardScanService>();
 
 // --- Seed data at startup ---
 builder.Services.AddSingleton(

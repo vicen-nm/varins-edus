@@ -14,6 +14,7 @@ public static class RoleTemplates
             "Cafeteria staff",
             [PermissionKeys.AccessScan, PermissionKeys.AccessView, PermissionKeys.AccessDisplay]),
         new(RoleKeys.CafeteriaDisplay, "Cafeteria display screen", [PermissionKeys.AccessDisplay]),
+        new(RoleKeys.GateStaff, "Gate staff", [PermissionKeys.CardsScan]),
         new(RoleKeys.Student, "Student", [])
     ];
 }

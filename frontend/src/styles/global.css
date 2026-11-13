@@ -375,3 +375,26 @@ select:focus-visible {
   align-items: center;
   min-height: 44px;
 }
+
+.scan-result {
+  display: grid;
+  gap: var(--space-1);
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius);
+  font-size: 1.125rem;
+  text-align: center;
+}
+
+.scan-result strong {
+  font-size: 1.5rem;
+}
+
+.scan-result--ok {
+  background: var(--color-accent-soft);
+}
+
+.scan-result--error {
+  color: var(--color-danger);
+  background: var(--color-danger-soft);
+}

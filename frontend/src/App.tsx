@@ -20,6 +20,7 @@ import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { UsersPage } from './pages/UsersPage';
 import { DevicesPage } from './pages/DevicesPage';
 import { PairDevicePage } from './pages/PairDevicePage';
+import { CardScanPage } from './pages/CardScanPage';
 
 export default function App() {
   return (
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="/settings/password" element={<ChangePasswordPage />} />
           <Route path="/students/import" element={<ImportStudentsPage />} />
           <Route path="/card" element={<CardPage />} />
+          <Route path="/cards/scan" element={<CardScanPage />} />
           <Route path="/access/points" element={<AccessPointsPage />} />
           <Route path="/access/manual" element={<AccessManualPage />} />
           <Route path="/access/screen" element={<CafeteriaScreenPage />} />

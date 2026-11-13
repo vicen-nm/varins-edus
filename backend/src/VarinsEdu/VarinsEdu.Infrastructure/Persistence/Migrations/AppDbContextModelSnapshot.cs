@@ -289,6 +289,47 @@ namespace VarinsEdu.Infrastructure.Persistence.Migrations
                     b.ToTable("audit_logs");
                 });
 
+            modelBuilder.Entity("VarinsEdu.Domain.Entities.CardScan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("InstitutionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("institution_id");
+
+                    b.Property<string>("Nonce")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("nonce");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("person_id");
+
+                    b.Property<DateTimeOffset>("ScannedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("scanned_at");
+
+                    b.Property<Guid>("ScannedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("scanned_by_user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ScannedByUserId");
+
+                    b.HasIndex("InstitutionId", "ScannedAt");
+
+                    b.HasIndex("PersonId", "Nonce")
+                        .IsUnique();
+
+                    b.ToTable("card_scans");
+                });
+
             modelBuilder.Entity("VarinsEdu.Domain.Entities.Group", b =>
                 {
                     b.Property<Guid>("Id")
@@ -939,6 +980,27 @@ namespace VarinsEdu.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("VarinsEdu.Domain.Entities.CardScan", b =>
+                {
+                    b.HasOne("VarinsEdu.Domain.Entities.Institution", null)
+                        .WithMany()
+                        .HasForeignKey("InstitutionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VarinsEdu.Domain.Entities.Person", null)
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VarinsEdu.Domain.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("ScannedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
