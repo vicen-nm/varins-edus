@@ -86,4 +86,19 @@ public class CardTokenServiceTests
 
         Assert.Equal(CardTokenStatus.Invalid, service.Verify(token).Status);
     }
+
+
+    [Fact]
+    public void A_verified_token_carries_its_nonce_and_each_token_has_its_own()
+    {
+        var service = new CardTokenService(Secret, new FakeClock(Start));
+        var person = Guid.NewGuid();
+        var institution = Guid.NewGuid();
+
+        var first = service.Verify(service.Issue(person, institution).Token);
+        var second = service.Verify(service.Issue(person, institution).Token);
+
+        Assert.False(string.IsNullOrEmpty(first.Nonce));
+        Assert.NotEqual(first.Nonce, second.Nonce);
+    }
 }

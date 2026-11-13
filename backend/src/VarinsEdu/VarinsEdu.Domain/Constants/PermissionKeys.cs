@@ -14,6 +14,7 @@ public static class PermissionKeys
     public const string AccessScan = "access.scan";
     public const string AccessView = "access.view";
     public const string AccessDisplay = "access.display";
+    public const string CardsScan = "cards.scan";
 
     // Platform-level permission: only the platform role gets it, never an institution role.
     public const string InstitutionsManage = "institutions.manage";
@@ -30,7 +31,8 @@ public static class PermissionKeys
         AccessManage,
         AccessScan,
         AccessView,
-        AccessDisplay
+        AccessDisplay,
+        CardsScan
     ];
 
     // Every permission, including the platform-level ones.
@@ -49,6 +51,7 @@ public static class PermissionKeys
         [AccessScan] = "Register access manually.",
         [AccessView] = "View the access registrations.",
         [AccessDisplay] = "Show an access point's QR screen (for display devices).",
+        [CardsScan] = "Scan student digital cards to identify students.",
         [InstitutionsManage] = "Create and manage institutions (platform only)."
     };
 }
