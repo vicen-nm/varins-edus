@@ -213,3 +213,38 @@ export type ScannedStudent = {
   lastName: string;
   group: string | null;
 };
+
+export type VehicleStatus = 'pending' | 'approved' | 'rejected' | 'suspended' | 'withdrawn';
+
+export type VehicleItem = {
+  id: string;
+  plate: string;
+  make: string;
+  model: string;
+  color: string;
+  status: VehicleStatus;
+  statusNote: string | null;
+  createdAt: string;
+  reviewedAt: string | null;
+};
+
+export type StaffVehicleItem = {
+  id: string;
+  plate: string;
+  make: string;
+  model: string;
+  color: string;
+  status: VehicleStatus;
+  statusNote: string | null;
+  firstName: string;
+  lastName: string;
+  group: string | null;
+  createdAt: string;
+  reviewedAt: string | null;
+  reviewedBy: string | null;
+};
+
+export type StaffVehicleList = {
+  total: number;
+  items: StaffVehicleItem[];
+};

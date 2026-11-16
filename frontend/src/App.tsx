@@ -21,6 +21,8 @@ import { UsersPage } from './pages/UsersPage';
 import { DevicesPage } from './pages/DevicesPage';
 import { PairDevicePage } from './pages/PairDevicePage';
 import { CardScanPage } from './pages/CardScanPage';
+import { MyVehiclesPage } from './pages/MyVehiclesPage';
+import { VehiclesReviewPage } from './pages/VehiclesReviewPage';
 
 export default function App() {
   return (
@@ -44,6 +46,8 @@ export default function App() {
           <Route path="/access/manual" element={<AccessManualPage />} />
           <Route path="/access/screen" element={<CafeteriaScreenPage />} />
           <Route path="/access/scan" element={<CafeteriaScanPage />} />
+          <Route path="/vehicles" element={<MyVehiclesPage />} />
+          <Route path="/vehicles/review" element={<VehiclesReviewPage />} />
           <Route path="/access/events" element={<AccessEventsPage />} />
           <Route path="/access/report" element={<AccessReportPage />} />
         </Route>
