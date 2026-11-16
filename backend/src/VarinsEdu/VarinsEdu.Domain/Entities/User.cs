@@ -23,5 +23,7 @@ public class User : IOptionalTenantEntity
     public int FailedLoginAttempts { get; set; }
     public DateTimeOffset? LockedUntil { get; set; }
 
+    // A display device (like the cafeteria screen). It has no password: it is paired with a one-time code.
+    public bool IsDevice { get; set; }
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 }

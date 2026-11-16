@@ -219,4 +219,24 @@ public class AuthServiceTests
         Assert.Contains("wrong_password", log.Metadata);
         Assert.DoesNotContain("not-the-password", log.Metadata);
     }
+
+
+    [Fact]
+    public async Task A_display_device_cannot_sign_in_with_a_password()
+    {
+        var (options, institutionId) = CreateDb();
+
+        using (var db = new AppDbContext(options, new PlatformTenant()))
+        {
+            var device = NewUser("screen", institutionId, true);
+            device.IsDevice = true;
+            db.Users.Add(device);
+            await db.SaveChangesAsync();
+        }
+
+        Assert.Null(await CreateService(options).ValidateCredentialsAsync("screen", Password));
+
+        var log = (await ReadAuditAsync(options)).Single();
+        Assert.Contains("device_account", log.Metadata);
+    }
 }

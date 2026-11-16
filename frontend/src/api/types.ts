@@ -3,6 +3,7 @@ export type UserInfo = {
   username: string;
   institutionId: string | null;
   isPlatform: boolean;
+  isDevice?: boolean;
   permissions: string[];
 };
 
@@ -176,4 +177,74 @@ export type AccessReport = {
   totals: ReportTotals;
   byDay: ReportDayRow[];
   byGroup: ReportGroupRow[];
+};
+
+export type UserItem = {
+  id: string;
+  username: string;
+  isActive: boolean;
+  isStudent: boolean;
+  isDevice?: boolean;
+  roles: string[];
+  createdAt: string;
+  lastLoginAt: string | null;
+  isLocked: boolean;
+};
+
+export type UserList = {
+  total: number;
+  items: UserItem[];
+};
+
+export type RoleItem = {
+  key: string;
+  name: string;
+};
+
+export type IssuedResetCode = {
+  userId: string;
+  username: string;
+  code: string;
+  expiresAt: string;
+};
+
+export type ScannedStudent = {
+  firstName: string;
+  lastName: string;
+  group: string | null;
+};
+
+export type VehicleStatus = 'pending' | 'approved' | 'rejected' | 'suspended' | 'withdrawn';
+
+export type VehicleItem = {
+  id: string;
+  plate: string;
+  make: string;
+  model: string;
+  color: string;
+  status: VehicleStatus;
+  statusNote: string | null;
+  createdAt: string;
+  reviewedAt: string | null;
+};
+
+export type StaffVehicleItem = {
+  id: string;
+  plate: string;
+  make: string;
+  model: string;
+  color: string;
+  status: VehicleStatus;
+  statusNote: string | null;
+  firstName: string;
+  lastName: string;
+  group: string | null;
+  createdAt: string;
+  reviewedAt: string | null;
+  reviewedBy: string | null;
+};
+
+export type StaffVehicleList = {
+  total: number;
+  items: StaffVehicleItem[];
 };

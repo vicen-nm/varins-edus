@@ -12,9 +12,9 @@ public static class AccessProblemExtensions
         {
             "access_point_not_found" or "access_service_not_found" or "student_not_found"
                 => StatusCodes.Status404NotFound,
-            "already_registered" or "access_point_name_taken" or "access_service_name_taken"
-                => StatusCodes.Status409Conflict,
-            "student_unavailable" or "too_far" or "location_inaccurate"
+            "already_registered" or "access_point_name_taken" or "access_service_name_taken" or "card_already_used"
+            => StatusCodes.Status409Conflict,
+            "student_unavailable" or "too_far" or "location_inaccurate" or "card_student_unavailable"
                 => StatusCodes.Status403Forbidden,
             _ => StatusCodes.Status400BadRequest
         };

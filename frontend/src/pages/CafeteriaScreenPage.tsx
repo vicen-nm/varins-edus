@@ -6,6 +6,7 @@ import { errorMessage } from '../api/errors';
 import type { AccessPoint, AccessQr } from '../api/types';
 import { useAuth } from '../auth/useAuth';
 import { useRefreshingValue } from '../hooks/useRefreshingValue';
+import { useWakeLock } from '../hooks/useWakeLock';
 
 // The token lives 30 s on the server: renewing every 10 s always leaves time to scan it.
 const REFRESH_MS = 10_000;
@@ -14,7 +15,7 @@ export function CafeteriaScreenPage() {
   const { user } = useAuth();
 
   // Hiding things is only a convenience: the server enforces this permission.
-  const allowed = Boolean(!user?.isPlatform && user?.permissions.includes('access.scan'));
+  const allowed = Boolean(!user?.isPlatform && user?.permissions.includes('access.display'));
 
   const [points, setPoints] = useState<AccessPoint[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -57,6 +58,14 @@ export function CafeteriaScreenPage() {
   );
 
   const { value: qrData, error: qrError } = useRefreshingValue(loadQr, REFRESH_MS);
+
+  
+  // A screen that goes to sleep shows no QR.
+  useWakeLock(allowed);
+
+  function enterFullscreen() {
+    document.documentElement.requestFullscreen?.().catch(() => undefined);
+  }
 
   const qr = qrData?.token ?? null;
   const shownError = error ?? (qrError !== null ? errorMessage(qrError) : null);
@@ -125,6 +134,13 @@ export function CafeteriaScreenPage() {
           )}
 
           <p className="hint">El código cambia solo cada pocos segundos.</p>
+
+          
+          <div className="actions">
+            <button type="button" className="secondary" onClick={enterFullscreen}>
+              Pantalla completa
+            </button>
+          </div>
 
           {import.meta.env.DEV && qr && (
             <details>

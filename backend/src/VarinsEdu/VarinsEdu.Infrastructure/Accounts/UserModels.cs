@@ -8,13 +8,16 @@ public sealed record UserListItem(
     IReadOnlyList<string> Roles,
     DateTimeOffset CreatedAt,
     DateTimeOffset? LastLoginAt,
-    bool IsLocked);
+    bool IsLocked,
+    bool IsDevice);
 
 public sealed record UserPage(int Total, IReadOnlyList<UserListItem> Items);
 
 public sealed record RoleItem(string Key, string Name);
 
 public sealed record CreateStaffInput(string? Username, string? RoleKey);
+
+public sealed record CreateDeviceInput(string? Name);
 
 public sealed record RolesInput(IReadOnlyList<string>? RoleKeys);
 

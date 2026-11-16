@@ -92,4 +92,14 @@ public class PermissionPolicyTests
 
         Assert.False(result.Succeeded);
     }
+
+    [Fact]
+    public async Task Access_points_can_be_read_with_scan_or_display_but_not_with_view_alone()
+    {
+        var auth = BuildProvider().GetRequiredService<IAuthorizationService>();
+
+        Assert.True((await auth.AuthorizeAsync(Principal(PermissionKeys.AccessScan), null, PermissionPolicies.AccessPointsRead)).Succeeded);
+        Assert.True((await auth.AuthorizeAsync(Principal(PermissionKeys.AccessDisplay), null, PermissionPolicies.AccessPointsRead)).Succeeded);
+        Assert.False((await auth.AuthorizeAsync(Principal(PermissionKeys.AccessView), null, PermissionPolicies.AccessPointsRead)).Succeeded);
+    }
 }

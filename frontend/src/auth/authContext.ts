@@ -10,8 +10,13 @@ export type ActivationInput = {
 
 export type AuthContextValue = {
   user: UserInfo | null;
-  login: (username: string, password: string) => Promise<void>;
+
+  // False while the app asks the server whether the browser still has a session to restore.
+  ready: boolean;
+
+  login: (username: string, password: string, remember?: boolean) => Promise<void>;
   activate: (input: ActivationInput) => Promise<void>;
+  pairDevice: (username: string, code: string) => Promise<void>;
   logout: () => void;
 };
 

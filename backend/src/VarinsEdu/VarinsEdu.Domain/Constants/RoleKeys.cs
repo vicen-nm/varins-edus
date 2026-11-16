@@ -6,8 +6,11 @@ public static class RoleKeys
     public const string InstitutionAdmin = "institution_admin";
     public const string Teacher = "teacher";
     public const string CafeteriaStaff = "cafeteria_staff";
+    public const string CafeteriaDisplay = "cafeteria_display";
+    public const string GateStaff = "gate_staff";
     public const string Student = "student";
+    public const string VehicleStaff = "vehicle_staff";
 
     // The roles that can be given to staff accounts. Students get theirs when they activate.
-    public static readonly string[] StaffRoles = [InstitutionAdmin, Teacher, CafeteriaStaff];
+    public static readonly string[] StaffRoles = [InstitutionAdmin, Teacher, CafeteriaStaff, GateStaff, VehicleStaff];
 }

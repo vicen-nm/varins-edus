@@ -289,6 +289,47 @@ namespace VarinsEdu.Infrastructure.Persistence.Migrations
                     b.ToTable("audit_logs");
                 });
 
+            modelBuilder.Entity("VarinsEdu.Domain.Entities.CardScan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("InstitutionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("institution_id");
+
+                    b.Property<string>("Nonce")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("nonce");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("person_id");
+
+                    b.Property<DateTimeOffset>("ScannedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("scanned_at");
+
+                    b.Property<Guid>("ScannedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("scanned_by_user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ScannedByUserId");
+
+                    b.HasIndex("InstitutionId", "ScannedAt");
+
+                    b.HasIndex("PersonId", "Nonce")
+                        .IsUnique();
+
+                    b.ToTable("card_scans");
+                });
+
             modelBuilder.Entity("VarinsEdu.Domain.Entities.Group", b =>
                 {
                     b.Property<Guid>("Id")
@@ -599,6 +640,69 @@ namespace VarinsEdu.Infrastructure.Persistence.Migrations
                     b.ToTable("people");
                 });
 
+            modelBuilder.Entity("VarinsEdu.Domain.Entities.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<Guid>("FamilyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("family_id");
+
+                    b.Property<DateTimeOffset>("FamilyStartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("family_started_at");
+
+                    b.Property<Guid?>("InstitutionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("institution_id");
+
+                    b.Property<bool>("Persistent")
+                        .HasColumnType("boolean")
+                        .HasColumnName("persistent");
+
+                    b.Property<DateTimeOffset?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("revoked_at");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("token_hash");
+
+                    b.Property<DateTimeOffset?>("UsedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("used_at");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FamilyId");
+
+                    b.HasIndex("InstitutionId");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("refresh_tokens");
+                });
+
             modelBuilder.Entity("VarinsEdu.Domain.Entities.Role", b =>
                 {
                     b.Property<Guid>("Id")
@@ -706,6 +810,10 @@ namespace VarinsEdu.Infrastructure.Persistence.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_active");
 
+                    b.Property<bool>("IsDevice")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_device");
+
                     b.Property<DateTimeOffset?>("LastLoginAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_login_at");
@@ -793,6 +901,89 @@ namespace VarinsEdu.Infrastructure.Persistence.Migrations
                     b.ToTable("user_roles");
                 });
 
+            modelBuilder.Entity("VarinsEdu.Domain.Entities.Vehicle", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("color");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_user_id");
+
+                    b.Property<Guid>("InstitutionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("institution_id");
+
+                    b.Property<string>("Make")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("make");
+
+                    b.Property<string>("Model")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("model");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("person_id");
+
+                    b.Property<string>("Plate")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("character varying(12)")
+                        .HasColumnName("plate");
+
+                    b.Property<DateTimeOffset?>("ReviewedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("reviewed_at");
+
+                    b.Property<Guid?>("ReviewedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reviewed_by_user_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("StatusNote")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("status_note");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("PersonId");
+
+                    b.HasIndex("ReviewedByUserId");
+
+                    b.HasIndex("InstitutionId", "Plate")
+                        .IsUnique()
+                        .HasFilter("status IN ('pending', 'approved', 'suspended')");
+
+                    b.HasIndex("InstitutionId", "Status");
+
+                    b.ToTable("vehicles");
+                });
+
             modelBuilder.Entity("VarinsEdu.Domain.Entities.AccessEvent", b =>
                 {
                     b.HasOne("VarinsEdu.Domain.Entities.AccessPoint", "AccessPoint")
@@ -875,6 +1066,27 @@ namespace VarinsEdu.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("VarinsEdu.Domain.Entities.CardScan", b =>
+                {
+                    b.HasOne("VarinsEdu.Domain.Entities.Institution", null)
+                        .WithMany()
+                        .HasForeignKey("InstitutionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VarinsEdu.Domain.Entities.Person", null)
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VarinsEdu.Domain.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("ScannedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("VarinsEdu.Domain.Entities.Group", b =>
                 {
                     b.HasOne("VarinsEdu.Domain.Entities.Institution", null)
@@ -942,6 +1154,20 @@ namespace VarinsEdu.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("InstitutionId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("VarinsEdu.Domain.Entities.RefreshToken", b =>
+                {
+                    b.HasOne("VarinsEdu.Domain.Entities.Institution", null)
+                        .WithMany()
+                        .HasForeignKey("InstitutionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("VarinsEdu.Domain.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -1039,6 +1265,34 @@ namespace VarinsEdu.Infrastructure.Persistence.Migrations
                     b.Navigation("Role");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("VarinsEdu.Domain.Entities.Vehicle", b =>
+                {
+                    b.HasOne("VarinsEdu.Domain.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VarinsEdu.Domain.Entities.Institution", null)
+                        .WithMany()
+                        .HasForeignKey("InstitutionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VarinsEdu.Domain.Entities.Person", "Person")
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VarinsEdu.Domain.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("ReviewedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Person");
                 });
 
             modelBuilder.Entity("VarinsEdu.Domain.Entities.Group", b =>

@@ -13,8 +13,12 @@ public enum CardTokenStatus
     Expired
 }
 
-public sealed record CardTokenVerification(CardTokenStatus Status, Guid? PersonId, Guid? InstitutionId);
-
+// Nonce: the random part of the token, which proves a token was already used.
+public sealed record CardTokenVerification(
+    CardTokenStatus Status,
+    Guid? PersonId,
+    Guid? InstitutionId,
+    string? Nonce = null);
 // Short-lived signed token shown as a QR on the student's card: "body.signature".
 // The body carries no secrets, only who it is for and when it expires.
 public sealed class CardTokenService
@@ -103,7 +107,7 @@ public sealed class CardTokenService
             return new CardTokenVerification(CardTokenStatus.Expired, null, null);
         }
 
-        return new CardTokenVerification(CardTokenStatus.Valid, personId, institutionId);
+        return new CardTokenVerification(CardTokenStatus.Valid, personId, institutionId, fields[4]);
     }
 
     private byte[] Sign(string body) => HMACSHA256.HashData(_key, Encoding.ASCII.GetBytes(body));

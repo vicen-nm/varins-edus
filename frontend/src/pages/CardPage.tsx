@@ -57,6 +57,13 @@ export function CardPage() {
             <QRCodeSVG value={card.token} size={256} level="M" bgColor="#ffffff" fgColor="#000000" />
           </div>
 
+          {import.meta.env.DEV && (
+            <details>
+              <summary>Texto del QR (solo desarrollo)</summary>
+              <code className="token-text">{card.token}</code>
+            </details>
+          )}
+
           <p className="hint">El código cambia solo. No lo compartas ni lo captures.</p>
         </section>
       )}
