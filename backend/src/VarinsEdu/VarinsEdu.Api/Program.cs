@@ -14,6 +14,7 @@ using VarinsEdu.Infrastructure.Accounts;
 using VarinsEdu.Infrastructure.Auditing;
 using VarinsEdu.Infrastructure.Imports;
 using VarinsEdu.Infrastructure.Institutions;
+using VarinsEdu.Infrastructure.Parking;
 using VarinsEdu.Infrastructure.Persistence;
 using VarinsEdu.Infrastructure.Security;
 using VarinsEdu.Infrastructure.Seeding;
@@ -108,6 +109,7 @@ builder.Services.AddScoped<RefreshTokenService>();
 builder.Services.AddScoped<DevicePairingService>();
 builder.Services.AddScoped<CardScanService>();
 builder.Services.AddScoped<VehicleService>();
+builder.Services.AddScoped<ParkingService>();
 
 // --- Seed data at startup ---
 builder.Services.AddSingleton(

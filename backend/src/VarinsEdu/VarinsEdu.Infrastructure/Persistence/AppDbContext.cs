@@ -31,6 +31,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentTenant
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<CardScan> CardScans => Set<CardScan>();
     public DbSet<Vehicle> Vehicles => Set<Vehicle>();
+    public DbSet<ParkingEvent> ParkingEvents => Set<ParkingEvent>();
 
     // The query filters read these two properties every time a query runs.
     private Guid? CurrentInstitutionId => currentTenant.InstitutionId;
