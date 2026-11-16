@@ -13,8 +13,12 @@ namespace VarinsEdu.Infrastructure.Students;
 // Only what staff need to recognise the student: no cédula, no photo.
 public sealed record ScannedStudent(string FirstName, string LastName, string? Group);
 
+// A card that passed every check but is not used up yet.
+public sealed record ResolvedCard(Guid PersonId, string Nonce, ScannedStudent Student);
+
 // Identifies a student from the QR of their card, and uses the token up: it works only once.
-// Vehicles, exits and the gate will call this same service.
+// Parking, exits and the gate use the same service: they verify first and use the card up when they record
+// what the scan authorizes.
 public class CardScanService(
     AppDbContext db,
     ICurrentTenant tenant,
@@ -25,15 +29,51 @@ public class CardScanService(
 {
     private const int MaxNonceLength = 64;
 
-    // The tenant filter limits every query to the caller's institution.
-    // Checks go from cheapest to most specific, and the token is only consumed at the very end:
-    // a token refused for any other reason is not used up.
+    // Verifies and uses the card up in one step.
     public async Task<Outcome<ScannedStudent>> ScanAsync(string? token, CancellationToken ct = default)
+    {
+        var verified = await VerifyAsync(token, ct);
+
+        if (verified.Error is { } error)
+        {
+            return Outcome<ScannedStudent>.Fail(error);
+        }
+
+        var card = verified.Value!;
+        var scan = Stage(card);
+
+        try
+        {
+            // The table is already the history of these scans: they are not audited one by one.
+            using (auditSuppression.Begin())
+            {
+                await db.SaveChangesAsync(ct);
+            }
+        }
+        catch (DbUpdateException)
+        {
+            db.Entry(scan).State = EntityState.Detached;
+
+            // Two scans at once: the unique index let only one through.
+            if (await IsUsedAsync(card.PersonId, card.Nonce, ct))
+            {
+                return await ReusedAsync<ScannedStudent>(card.PersonId, ct);
+            }
+
+            throw;
+        }
+
+        return Outcome<ScannedStudent>.Ok(card.Student);
+    }
+
+    // Checks go from cheapest to most specific. Nothing is written here: the card is not used up.
+    // The tenant filter limits every query to the caller's institution.
+    public async Task<Outcome<ResolvedCard>> VerifyAsync(string? token, CancellationToken ct = default)
     {
         var institutionId = tenant.InstitutionId
             ?? throw new TenantViolationException("Only institution users can scan cards.");
 
-        var staffId = currentUser.UserId
+        _ = currentUser.UserId
             ?? throw new InvalidOperationException("An authenticated user is required to scan cards.");
 
         var check = tokens.Verify(token);
@@ -75,57 +115,50 @@ public class CardScanService(
             return Fail("card_student_unavailable");
         }
 
-        if (await UsedAsync(personId, nonce, ct))
+        if (await IsUsedAsync(personId, nonce, ct))
         {
-            return await ReusedAsync(institutionId, staffId, personId, ct);
+            return await ReusedAsync<ResolvedCard>(personId, ct);
         }
+
+        return Outcome<ResolvedCard>.Ok(new ResolvedCard(personId, nonce, student));
+    }
+
+    // Adds the scan to the context WITHOUT saving: the caller saves it together with what the scan authorizes.
+    public CardScan Stage(ResolvedCard card)
+    {
+        var institutionId = tenant.InstitutionId
+            ?? throw new TenantViolationException("Only institution users can scan cards.");
+
+        var staffId = currentUser.UserId
+            ?? throw new InvalidOperationException("An authenticated user is required to scan cards.");
 
         var scan = new CardScan
         {
             Id = Guid.NewGuid(),
             InstitutionId = institutionId,
-            PersonId = personId,
-            Nonce = nonce,
+            PersonId = card.PersonId,
+            Nonce = card.Nonce,
             ScannedByUserId = staffId,
             ScannedAt = time.GetUtcNow()
         };
 
         db.CardScans.Add(scan);
 
-        try
-        {
-            // The table is already the history of these scans: they are not audited one by one.
-            using (auditSuppression.Begin())
-            {
-                await db.SaveChangesAsync(ct);
-            }
-        }
-        catch (DbUpdateException)
-        {
-            db.Entry(scan).State = EntityState.Detached;
-
-            // Two scans at once: the unique index let only one through.
-            if (await UsedAsync(personId, nonce, ct))
-            {
-                return await ReusedAsync(institutionId, staffId, personId, ct);
-            }
-
-            throw;
-        }
-
-        return Outcome<ScannedStudent>.Ok(student);
+        return scan;
     }
 
-    private Task<bool> UsedAsync(Guid personId, string nonce, CancellationToken ct) =>
+    public Task<bool> IsUsedAsync(Guid personId, string nonce, CancellationToken ct = default) =>
         db.CardScans.AnyAsync(c => c.PersonId == personId && c.Nonce == nonce, ct);
 
     // A code scanned twice is a clue: a screenshot, or a card shown to two people. No cédula is recorded.
-    private async Task<Outcome<ScannedStudent>> ReusedAsync(
-        Guid institutionId,
-        Guid staffId,
-        Guid personId,
-        CancellationToken ct)
+    public async Task<Outcome<T>> ReusedAsync<T>(Guid personId, CancellationToken ct = default)
     {
+        var institutionId = tenant.InstitutionId
+            ?? throw new TenantViolationException("Only institution users can scan cards.");
+
+        var staffId = currentUser.UserId
+            ?? throw new InvalidOperationException("An authenticated user is required to scan cards.");
+
         db.AuditLogs.Add(new AuditLog
         {
             InstitutionId = institutionId,
@@ -139,8 +172,8 @@ public class CardScanService(
 
         await db.SaveChangesAsync(ct);
 
-        return Fail("card_already_used");
+        return Outcome<T>.Fail("card_already_used");
     }
 
-    private static Outcome<ScannedStudent> Fail(string code) => Outcome<ScannedStudent>.Fail(code);
+    private static Outcome<ResolvedCard> Fail(string code) => Outcome<ResolvedCard>.Fail(code);
 }

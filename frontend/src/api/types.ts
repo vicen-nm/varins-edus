@@ -248,3 +248,44 @@ export type StaffVehicleList = {
   total: number;
   items: StaffVehicleItem[];
 };
+
+export type ParkingVehicle = {
+  id: string;
+  plate: string;
+  make: string;
+  model: string;
+  color: string;
+  inside: boolean;
+  insideSince: string | null;
+};
+
+export type ParkingPreview = {
+  student: ScannedStudent;
+  vehicles: ParkingVehicle[];
+};
+
+export type ParkingResult = {
+  action: 'entry' | 'exit';
+  student: ScannedStudent;
+  plate: string;
+  at: string;
+};
+
+export type ParkingEventStatus = 'inside' | 'exited' | 'no_exit';
+
+export type ParkingEventItem = {
+  id: string;
+  plate: string;
+  firstName: string;
+  lastName: string;
+  group: string | null;
+  enteredAt: string;
+  exitedAt: string | null;
+  status: ParkingEventStatus;
+};
+
+export type ParkingEventPage = {
+  total: number;
+  inside: number;
+  items: ParkingEventItem[];
+};

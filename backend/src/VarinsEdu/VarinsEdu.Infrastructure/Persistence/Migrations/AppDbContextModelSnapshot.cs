@@ -514,6 +514,66 @@ namespace VarinsEdu.Infrastructure.Persistence.Migrations
                     b.ToTable("institution_settings");
                 });
 
+            modelBuilder.Entity("VarinsEdu.Domain.Entities.ParkingEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<bool>("AutoClosed")
+                        .HasColumnType("boolean")
+                        .HasColumnName("auto_closed");
+
+                    b.Property<DateTimeOffset>("EnteredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("entered_at");
+
+                    b.Property<Guid>("EnteredByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("entered_by_user_id");
+
+                    b.Property<DateTimeOffset?>("ExitedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("exited_at");
+
+                    b.Property<Guid?>("ExitedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("exited_by_user_id");
+
+                    b.Property<Guid>("InstitutionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("institution_id");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("person_id");
+
+                    b.Property<DateOnly>("ServiceDate")
+                        .HasColumnType("date")
+                        .HasColumnName("service_date");
+
+                    b.Property<Guid>("VehicleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("vehicle_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EnteredByUserId");
+
+                    b.HasIndex("ExitedByUserId");
+
+                    b.HasIndex("PersonId");
+
+                    b.HasIndex("VehicleId")
+                        .IsUnique()
+                        .HasFilter("exited_at IS NULL AND auto_closed = false");
+
+                    b.HasIndex("InstitutionId", "ServiceDate");
+
+                    b.ToTable("parking_events");
+                });
+
             modelBuilder.Entity("VarinsEdu.Domain.Entities.PasswordResetCode", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1131,6 +1191,42 @@ namespace VarinsEdu.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Institution");
+                });
+
+            modelBuilder.Entity("VarinsEdu.Domain.Entities.ParkingEvent", b =>
+                {
+                    b.HasOne("VarinsEdu.Domain.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("EnteredByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VarinsEdu.Domain.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("ExitedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("VarinsEdu.Domain.Entities.Institution", null)
+                        .WithMany()
+                        .HasForeignKey("InstitutionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VarinsEdu.Domain.Entities.Person", "Person")
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VarinsEdu.Domain.Entities.Vehicle", "Vehicle")
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Person");
+
+                    b.Navigation("Vehicle");
                 });
 
             modelBuilder.Entity("VarinsEdu.Domain.Entities.PasswordResetCode", b =>
