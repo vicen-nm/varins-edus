@@ -22,8 +22,8 @@ public class AuditSaveChangesInterceptor(
         // Secrets
         "PasswordHash", "CodeHash", "TokenHash", "QrTokenHash",
 
-        // Personal data
-        "IdentificationNumber", "FirstName", "LastName", "Phone", "Email"
+            // Personal data (a plate tied to a minor, and the free-text note of a decision, count as personal data)
+        "IdentificationNumber", "FirstName", "LastName", "Phone", "Email", "Plate", "StatusNote"
     };
 
     public override InterceptionResult<int> SavingChanges(

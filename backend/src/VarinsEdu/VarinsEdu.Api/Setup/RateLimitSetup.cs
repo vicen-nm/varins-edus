@@ -11,6 +11,7 @@ public static class RateLimitSetup
     public const string CheckInPolicy = "check-in";
     public const string RefreshPolicy = "refresh";
     public const string ScanPolicy = "scan";
+    public const string VehiclePolicy = "vehicles";
 
     // Many students share the school's single public IP, so this only stops floods.
     // Guessing codes and passwords is stopped by per-code and per-account limits instead.
@@ -25,6 +26,9 @@ public static class RateLimitSetup
 
     // A gate guard at the busiest minute scans a few dozen cards: this only stops a script.
     private const int ScanPermitsPerMinute = 120;
+
+    // A student asking or withdrawing vehicles: this only stops a script that creates and withdraws in a loop.
+    private const int VehiclePermitsPerMinute = 20;
 
     // Each person gets their own counter. Without a session the IP is used.
     public static string PartitionKey(string? userId, string? ipAddress) =>
@@ -57,6 +61,7 @@ public static class RateLimitSetup
             AddUserPolicy(options, CardPolicy, CardPermitsPerMinute);
             AddUserPolicy(options, CheckInPolicy, CheckInPermitsPerMinute);
             AddUserPolicy(options, ScanPolicy, ScanPermitsPerMinute);
+            AddUserPolicy(options, VehiclePolicy, VehiclePermitsPerMinute);
 
             options.OnRejected = async (context, cancellationToken) =>
             {
