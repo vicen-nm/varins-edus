@@ -35,16 +35,20 @@ export function HomePage() {
     },
     {
       title: 'Comedor',
-      links: [
-        { to: '/access/screen', label: 'Pantalla del comedor', visible: can('access.display') },
-        { to: '/access/manual', label: 'Registro manual', visible: can('access.scan') },
-        { to: '/access/events', label: 'Registros de acceso', visible: can('access.view') },
-        { to: '/access/report', label: 'Reporte del comedor', visible: can('access.view') },
-      ],
+        links: [
+          { to: '/access/screen', label: 'Pantalla del comedor', visible: can('access.display') },
+          { to: '/access/manual', label: 'Registro manual', visible: can('access.scan') },
+          { to: '/access/events', label: 'Registros de acceso', visible: can('access.view') },
+          { to: '/access/report', label: 'Reporte del comedor', visible: can('access.view') },
+        ],
     },
     {
       title: 'Portería',
-      links: [{ to: '/cards/scan', label: 'Verificar carné (escanear)', visible: can('cards.scan') }],
+        links: [
+          { to: '/cards/scan', label: 'Verificar carné (escanear)', visible: can('cards.scan') },
+          { to: '/parking/scan', label: 'Parqueo: ingreso y salida', visible: can('parking.scan') },
+          { to: '/parking/events', label: 'Movimientos del parqueo', visible: can('parking.view') },
+      ],
     },
         {
       title: 'Vehículos',

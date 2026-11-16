@@ -23,6 +23,8 @@ import { PairDevicePage } from './pages/PairDevicePage';
 import { CardScanPage } from './pages/CardScanPage';
 import { MyVehiclesPage } from './pages/MyVehiclesPage';
 import { VehiclesReviewPage } from './pages/VehiclesReviewPage';
+import { ParkingEventsPage } from './pages/ParkingEventsPage';
+import { ParkingScanPage } from './pages/ParkingScanPage';
 
 export default function App() {
   return (
@@ -48,6 +50,8 @@ export default function App() {
           <Route path="/access/scan" element={<CafeteriaScanPage />} />
           <Route path="/vehicles" element={<MyVehiclesPage />} />
           <Route path="/vehicles/review" element={<VehiclesReviewPage />} />
+          <Route path="/parking/scan" element={<ParkingScanPage />} />
+          <Route path="/parking/events" element={<ParkingEventsPage />} />
           <Route path="/access/events" element={<AccessEventsPage />} />
           <Route path="/access/report" element={<AccessReportPage />} />
         </Route>
