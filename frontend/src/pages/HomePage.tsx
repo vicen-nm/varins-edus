@@ -29,6 +29,7 @@ export function HomePage() {
       links: [
         { to: '/card', label: 'Mi carné', visible: inInstitution },
         { to: '/access/scan', label: 'Registrar mi comida (escanear QR)', visible: inInstitution },
+        { to: '/vehicles', label: 'Mis vehículos', visible: inInstitution },
         { to: '/settings/password', label: 'Cambiar mi contraseña', visible: true },
       ],
     },
@@ -44,6 +45,10 @@ export function HomePage() {
     {
       title: 'Portería',
       links: [{ to: '/cards/scan', label: 'Verificar carné (escanear)', visible: can('cards.scan') }],
+    },
+        {
+      title: 'Vehículos',
+      links: [{ to: '/vehicles/review', label: 'Revisión de vehículos', visible: can('vehicles.view') }],
     },
     {
       title: 'Estudiantes',
