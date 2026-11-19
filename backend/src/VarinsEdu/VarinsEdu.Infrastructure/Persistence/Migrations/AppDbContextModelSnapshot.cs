@@ -330,6 +330,85 @@ namespace VarinsEdu.Infrastructure.Persistence.Migrations
                     b.ToTable("card_scans");
                 });
 
+            modelBuilder.Entity("VarinsEdu.Domain.Entities.ExitPermit", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("CancelledAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("cancelled_at");
+
+                    b.Property<Guid?>("CancelledByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("cancelled_by_user_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_user_id");
+
+                    b.Property<TimeOnly>("FromTime")
+                        .HasColumnType("time without time zone")
+                        .HasColumnName("from_time");
+
+                    b.Property<Guid>("InstitutionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("institution_id");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("person_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("reason");
+
+                    b.Property<DateOnly>("ServiceDate")
+                        .HasColumnType("date")
+                        .HasColumnName("service_date");
+
+                    b.Property<string>("Status")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<TimeOnly>("ToTime")
+                        .HasColumnType("time without time zone")
+                        .HasColumnName("to_time");
+
+                    b.Property<DateTimeOffset?>("UsedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("used_at");
+
+                    b.Property<Guid?>("UsedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("used_by_user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CancelledByUserId");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("UsedByUserId");
+
+                    b.HasIndex("InstitutionId", "ServiceDate");
+
+                    b.HasIndex("PersonId", "ServiceDate");
+
+                    b.ToTable("exit_permits");
+                });
+
             modelBuilder.Entity("VarinsEdu.Domain.Entities.Group", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1145,6 +1224,39 @@ namespace VarinsEdu.Infrastructure.Persistence.Migrations
                         .HasForeignKey("ScannedByUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("VarinsEdu.Domain.Entities.ExitPermit", b =>
+                {
+                    b.HasOne("VarinsEdu.Domain.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("CancelledByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("VarinsEdu.Domain.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VarinsEdu.Domain.Entities.Institution", null)
+                        .WithMany()
+                        .HasForeignKey("InstitutionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VarinsEdu.Domain.Entities.Person", "Person")
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VarinsEdu.Domain.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UsedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Person");
                 });
 
             modelBuilder.Entity("VarinsEdu.Domain.Entities.Group", b =>

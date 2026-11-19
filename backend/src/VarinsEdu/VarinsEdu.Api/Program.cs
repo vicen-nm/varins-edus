@@ -12,6 +12,7 @@ using VarinsEdu.Domain.Common;
 using VarinsEdu.Infrastructure.Access;
 using VarinsEdu.Infrastructure.Accounts;
 using VarinsEdu.Infrastructure.Auditing;
+using VarinsEdu.Infrastructure.Exits;
 using VarinsEdu.Infrastructure.Imports;
 using VarinsEdu.Infrastructure.Institutions;
 using VarinsEdu.Infrastructure.Parking;
@@ -110,6 +111,7 @@ builder.Services.AddScoped<DevicePairingService>();
 builder.Services.AddScoped<CardScanService>();
 builder.Services.AddScoped<VehicleService>();
 builder.Services.AddScoped<ParkingService>();
+builder.Services.AddScoped<ExitPermitService>();
 
 // --- Seed data at startup ---
 builder.Services.AddSingleton(

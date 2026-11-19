@@ -8,13 +8,16 @@ public static class RoleTemplates
     public static readonly IReadOnlyList<RoleTemplate> ForInstitutions =
     [
         new(RoleKeys.InstitutionAdmin, "Institution administrator", PermissionKeys.ForInstitutions),
-        new(RoleKeys.Teacher, "Teacher", [PermissionKeys.StudentsView]),
+        new(RoleKeys.Teacher, "Teacher", [PermissionKeys.StudentsView, PermissionKeys.ExitsManage]),
         new(
             RoleKeys.CafeteriaStaff,
             "Cafeteria staff",
             [PermissionKeys.AccessScan, PermissionKeys.AccessView, PermissionKeys.AccessDisplay]),
         new(RoleKeys.CafeteriaDisplay, "Cafeteria display screen", [PermissionKeys.AccessDisplay]),
-        new(RoleKeys.GateStaff, "Gate staff", [PermissionKeys.CardsScan, PermissionKeys.ParkingScan, PermissionKeys.ParkingView]),
+                new(
+            RoleKeys.GateStaff,
+            "Gate staff",
+            [PermissionKeys.CardsScan, PermissionKeys.ParkingScan, PermissionKeys.ParkingView, PermissionKeys.ExitsScan]),
         new(RoleKeys.VehicleStaff, "Vehicle staff", [PermissionKeys.VehiclesManage, PermissionKeys.VehiclesView]),
         new(RoleKeys.Student, "Student", [])
     ];

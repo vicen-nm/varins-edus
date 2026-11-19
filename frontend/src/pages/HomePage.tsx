@@ -48,6 +48,7 @@ export function HomePage() {
           { to: '/cards/scan', label: 'Verificar carné (escanear)', visible: can('cards.scan') },
           { to: '/parking/scan', label: 'Parqueo: ingreso y salida', visible: can('parking.scan') },
           { to: '/parking/events', label: 'Movimientos del parqueo', visible: can('parking.view') },
+          { to: '/exits/scan', label: 'Salida con permiso (escanear)', visible: can('exits.scan') },
       ],
     },
         {
@@ -59,6 +60,7 @@ export function HomePage() {
       links: [
         { to: '/students', label: 'Estudiantes', visible: can('students.view') },
         { to: '/students/import', label: 'Importar desde Excel', visible: can('students.import') },
+        { to: '/exits', label: 'Permisos de salida', visible: can('exits.manage') },
       ],
     },
     {
