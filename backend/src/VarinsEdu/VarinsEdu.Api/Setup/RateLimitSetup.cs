@@ -11,6 +11,7 @@ public static class RateLimitSetup
     public const string CheckInPolicy = "check-in";
     public const string RefreshPolicy = "refresh";
     public const string ScanPolicy = "scan";
+    public const string PublicVisitPolicy = "public-visit";
     public const string VehiclePolicy = "vehicles";
 
     // Many students share the school's single public IP, so this only stops floods.
@@ -26,6 +27,9 @@ public static class RateLimitSetup
 
     // A gate guard at the busiest minute scans a few dozen cards: this only stops a script.
     private const int ScanPermitsPerMinute = 120;
+
+    // The public visitor form, per IP: visitors use their own phones, so a few per minute is plenty.
+    private const int PublicVisitPermitsPerMinute = 20;
 
     // A student asking or withdrawing vehicles: this only stops a script that creates and withdraws in a loop.
     private const int VehiclePermitsPerMinute = 20;
@@ -58,6 +62,15 @@ public static class RateLimitSetup
                     Window = TimeSpan.FromMinutes(1),
                     QueueLimit = 0
                 }));
+            options.AddPolicy(PublicVisitPolicy, httpContext =>
+            RateLimitPartition.GetFixedWindowLimiter(
+            httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = PublicVisitPermitsPerMinute,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            }));
             AddUserPolicy(options, CardPolicy, CardPermitsPerMinute);
             AddUserPolicy(options, CheckInPolicy, CheckInPermitsPerMinute);
             AddUserPolicy(options, ScanPolicy, ScanPermitsPerMinute);
