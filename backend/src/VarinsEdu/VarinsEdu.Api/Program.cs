@@ -21,6 +21,7 @@ using VarinsEdu.Infrastructure.Security;
 using VarinsEdu.Infrastructure.Seeding;
 using VarinsEdu.Infrastructure.Students;
 using VarinsEdu.Infrastructure.Vehicles;
+using VarinsEdu.Infrastructure.Visits;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -112,6 +113,8 @@ builder.Services.AddScoped<CardScanService>();
 builder.Services.AddScoped<VehicleService>();
 builder.Services.AddScoped<ParkingService>();
 builder.Services.AddScoped<ExitPermitService>();
+builder.Services.AddScoped<VisitService>();
+builder.Services.AddScoped<PublicVisitService>();
 
 // --- Seed data at startup ---
 builder.Services.AddSingleton(

@@ -17,7 +17,7 @@ public static class RoleTemplates
                 new(
             RoleKeys.GateStaff,
             "Gate staff",
-            [PermissionKeys.CardsScan, PermissionKeys.ParkingScan, PermissionKeys.ParkingView, PermissionKeys.ExitsScan]),
+            [PermissionKeys.ParkingView, PermissionKeys.ExitsScan, PermissionKeys.VisitsManage, PermissionKeys.VisitsView]),
         new(RoleKeys.VehicleStaff, "Vehicle staff", [PermissionKeys.VehiclesManage, PermissionKeys.VehiclesView]),
         new(RoleKeys.Student, "Student", [])
     ];

@@ -412,3 +412,27 @@ select:focus-visible {
   gap: var(--space-2);
   text-align: left;
 }
+
+.signature-pad {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+  background: #ffffff;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius);
+  touch-action: none;
+}
+
+.visitor-signature-label {
+  margin: var(--space-3) 0 var(--space-1);
+  font-weight: 600;
+}
+
+.signature-image {
+  display: block;
+  max-width: 100%;
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}

@@ -27,6 +27,8 @@ import { ParkingEventsPage } from './pages/ParkingEventsPage';
 import { ParkingScanPage } from './pages/ParkingScanPage';
 import { ExitPermitsPage } from './pages/ExitPermitsPage';
 import { ExitScanPage } from './pages/ExitScanPage';
+import { VisitorFormPage } from './pages/VisitorFormPage';
+import { VisitsPage } from './pages/VisitsPage';
 
 export default function App() {
   return (
@@ -36,6 +38,7 @@ export default function App() {
         <Route path="/activar/:slug" element={<ActivatePage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/emparejar" element={<PairDevicePage />} />
+        <Route path="/visitas/:slug" element={<VisitorFormPage />} />
         <Route element={<RequireAuth />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/settings/branding" element={<BrandingPage />} />
@@ -56,6 +59,7 @@ export default function App() {
           <Route path="/parking/events" element={<ParkingEventsPage />} />
           <Route path="/exits" element={<ExitPermitsPage />} />
           <Route path="/exits/scan" element={<ExitScanPage />} />
+          <Route path="/visits" element={<VisitsPage />} />
           <Route path="/access/events" element={<AccessEventsPage />} />
           <Route path="/access/report" element={<AccessReportPage />} />
         </Route>

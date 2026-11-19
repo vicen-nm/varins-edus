@@ -24,6 +24,8 @@ public static class PermissionKeys
     public const string InstitutionsManage = "institutions.manage";
     public const string ExitsManage = "exits.manage";
     public const string ExitsScan = "exits.scan";
+    public const string VisitsManage = "visits.manage";
+    public const string VisitsView = "visits.view";
 
     public static readonly string[] ForInstitutions =
     [
@@ -44,7 +46,9 @@ public static class PermissionKeys
         ParkingScan,
         ParkingView,
         ExitsManage,
-        ExitsScan
+        ExitsScan,
+        VisitsManage,
+        VisitsView
     ];
 
     // Every permission, including the platform-level ones.
@@ -70,6 +74,8 @@ public static class PermissionKeys
         [ParkingView] = "View the parking entries and exits.",
         [ExitsManage] = "Create and cancel student exit permits.",
         [ExitsScan] = "Register student exits at the gate by scanning cards.",
+        [VisitsManage] = "Admit or reject visitors and register their exit.",
+        [VisitsView] = "View the visitors and their signatures.",
         [InstitutionsManage] = "Create and manage institutions (platform only)."
     };
 }

@@ -327,3 +327,27 @@ export type ExitResult = {
   student: ScannedStudent;
   at: string;
 };
+
+export type VisitStatus = 'pending' | 'inside' | 'exited' | 'rejected' | 'expired' | 'no_exit';
+
+export type VisitItem = {
+  id: string;
+  fullName: string;
+  identificationNumber: string;
+  phone: string | null;
+  host: string;
+  reason: string;
+  status: VisitStatus;
+  createdAt: string;
+  enteredAt: string | null;
+  handledBy: string | null;
+  exitedAt: string | null;
+  exitedBy: string | null;
+};
+
+export type VisitPage = {
+  total: number;
+  inside: number;
+  pending: number;
+  items: VisitItem[];
+};
