@@ -49,6 +49,7 @@ export function HomePage() {
           { to: '/parking/scan', label: 'Parqueo: ingreso y salida', visible: can('parking.scan') },
           { to: '/parking/events', label: 'Movimientos del parqueo', visible: can('parking.view') },
           { to: '/exits/scan', label: 'Salida con permiso (escanear)', visible: can('exits.scan') },
+          { to: '/visits', label: 'Visitas', visible: can('visits.view') },
       ],
     },
         {
