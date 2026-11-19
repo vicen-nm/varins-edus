@@ -289,3 +289,41 @@ export type ParkingEventPage = {
   inside: number;
   items: ParkingEventItem[];
 };
+
+export type ExitPermitStatus = 'active' | 'used' | 'cancelled' | 'expired';
+
+export type ExitPermitItem = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  group: string | null;
+  date: string;
+  fromTime: string;
+  toTime: string;
+  reason: string;
+  status: ExitPermitStatus;
+  createdBy: string | null;
+  usedAt: string | null;
+  usedBy: string | null;
+};
+
+export type ExitPermitPage = {
+  total: number;
+  items: ExitPermitItem[];
+};
+
+export type ExitOption = {
+  id: string;
+  fromTime: string;
+  toTime: string;
+};
+
+export type ExitPreview = {
+  student: ScannedStudent;
+  permits: ExitOption[];
+};
+
+export type ExitResult = {
+  student: ScannedStudent;
+  at: string;
+};

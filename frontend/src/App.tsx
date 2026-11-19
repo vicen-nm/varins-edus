@@ -25,6 +25,8 @@ import { MyVehiclesPage } from './pages/MyVehiclesPage';
 import { VehiclesReviewPage } from './pages/VehiclesReviewPage';
 import { ParkingEventsPage } from './pages/ParkingEventsPage';
 import { ParkingScanPage } from './pages/ParkingScanPage';
+import { ExitPermitsPage } from './pages/ExitPermitsPage';
+import { ExitScanPage } from './pages/ExitScanPage';
 
 export default function App() {
   return (
@@ -52,6 +54,8 @@ export default function App() {
           <Route path="/vehicles/review" element={<VehiclesReviewPage />} />
           <Route path="/parking/scan" element={<ParkingScanPage />} />
           <Route path="/parking/events" element={<ParkingEventsPage />} />
+          <Route path="/exits" element={<ExitPermitsPage />} />
+          <Route path="/exits/scan" element={<ExitScanPage />} />
           <Route path="/access/events" element={<AccessEventsPage />} />
           <Route path="/access/report" element={<AccessReportPage />} />
         </Route>
