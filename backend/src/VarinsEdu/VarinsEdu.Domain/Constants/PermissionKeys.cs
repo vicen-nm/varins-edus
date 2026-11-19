@@ -22,6 +22,8 @@ public static class PermissionKeys
 
     // Platform-level permission: only the platform role gets it, never an institution role.
     public const string InstitutionsManage = "institutions.manage";
+    public const string ExitsManage = "exits.manage";
+    public const string ExitsScan = "exits.scan";
 
     public static readonly string[] ForInstitutions =
     [
@@ -40,7 +42,9 @@ public static class PermissionKeys
         VehiclesManage,
         VehiclesView,
         ParkingScan,
-        ParkingView
+        ParkingView,
+        ExitsManage,
+        ExitsScan
     ];
 
     // Every permission, including the platform-level ones.
@@ -64,6 +68,8 @@ public static class PermissionKeys
         [VehiclesView] = "View students' vehicles and their approval status.",
         [ParkingScan] = "Register vehicle entries and exits at the gate by scanning student cards.",
         [ParkingView] = "View the parking entries and exits.",
+        [ExitsManage] = "Create and cancel student exit permits.",
+        [ExitsScan] = "Register student exits at the gate by scanning cards.",
         [InstitutionsManage] = "Create and manage institutions (platform only)."
     };
 }
