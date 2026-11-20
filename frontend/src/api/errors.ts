@@ -93,6 +93,8 @@ const messages: Record<string, string> = {
   visit_limit_reached: 'Hoy se recibieron demasiadas solicitudes. Acércate al guardia.',
   visit_not_found: 'No se encontró la visita.',
   invalid_visit_status: 'Ese cambio no es posible: puede que otro guardia ya atendió esta visita.',
+  invalid_preferences: 'Las preferencias no son válidas.',
+  student_account_not_found: 'Este estudiante todavía no tiene cuenta: primero debe activarla.',
   too_many_requests: 'Demasiados intentos. Espera un momento y vuelve a intentarlo.',
   http_401: 'Tu sesión venció. Inicia sesión de nuevo.',
   http_403: 'No tienes permiso para realizar esta acción.',

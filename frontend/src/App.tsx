@@ -29,6 +29,9 @@ import { ExitPermitsPage } from './pages/ExitPermitsPage';
 import { ExitScanPage } from './pages/ExitScanPage';
 import { VisitorFormPage } from './pages/VisitorFormPage';
 import { VisitsPage } from './pages/VisitsPage';
+import { AccessibilityStudentsPage } from './pages/AccessibilityStudentsPage';
+import { DisplayPage } from './pages/DisplayPage';
+import { ReadAloudButton } from './components/ReadAloudButton';
 
 export default function App() {
   return (
@@ -60,6 +63,8 @@ export default function App() {
           <Route path="/exits" element={<ExitPermitsPage />} />
           <Route path="/exits/scan" element={<ExitScanPage />} />
           <Route path="/visits" element={<VisitsPage />} />
+          <Route path="/settings/display" element={<DisplayPage />} />
+          <Route path="/accessibility/students" element={<AccessibilityStudentsPage />} />
           <Route path="/access/events" element={<AccessEventsPage />} />
           <Route path="/access/report" element={<AccessReportPage />} />
         </Route>
@@ -68,6 +73,7 @@ export default function App() {
 
       <OfflineBanner />
       <UpdatePrompt />
+      <ReadAloudButton />
     </>
   );
 }

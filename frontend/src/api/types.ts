@@ -351,3 +351,13 @@ export type VisitPage = {
   pending: number;
   items: VisitItem[];
 };
+
+export type UiMode = 'standard' | 'simple';
+
+export type DisplayPreferences = {
+  uiMode: UiMode;
+  fontScale: number;
+  readAloud: boolean;
+  highContrast: boolean;
+  reducedMotion: boolean;
+};

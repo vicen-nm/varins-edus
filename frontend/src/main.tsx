@@ -8,13 +8,16 @@ import './styles/global.css';
 import App from './App';
 import { AuthProvider } from './auth/AuthProvider';
 import { InstitutionProvider } from './institution/InstitutionProvider';
+import { PreferencesProvider } from './preferences/PreferencesProvider';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
         <InstitutionProvider>
-          <App />
+          <PreferencesProvider>
+            <App />
+          </PreferencesProvider>
         </InstitutionProvider>
       </AuthProvider>
     </BrowserRouter>

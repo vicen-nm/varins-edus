@@ -1,12 +1,14 @@
 import { Link, Navigate } from 'react-router';
 import { useAuth } from '../auth/useAuth';
 import { useInstitution } from '../institution/useInstitution';
+import { usePreferences } from '../preferences/usePreferences';
 
 type NavLink = { to: string; label: string; visible: boolean };
 
 export function HomePage() {
   const { user, logout } = useAuth();
   const { institution, error } = useInstitution();
+  const { preferences } = usePreferences();
 
   if (!user) {
     return null;
@@ -16,6 +18,9 @@ export function HomePage() {
   if (user.isDevice) {
     return <Navigate to="/access/screen" replace />;
   }
+
+  // The simple mode keeps every function: it makes things bigger and hides the technical cards.
+  const simple = preferences.uiMode === 'simple';
 
   const institutionName = institution?.settings?.displayName || institution?.name;
 
@@ -30,29 +35,30 @@ export function HomePage() {
         { to: '/card', label: 'Mi carné', visible: inInstitution },
         { to: '/access/scan', label: 'Registrar mi comida (escanear QR)', visible: inInstitution },
         { to: '/vehicles', label: 'Mis vehículos', visible: inInstitution },
+        { to: '/settings/display', label: 'Mi pantalla (letra, contraste, modo simple)', visible: true },
         { to: '/settings/password', label: 'Cambiar mi contraseña', visible: true },
       ],
     },
     {
       title: 'Comedor',
-        links: [
-          { to: '/access/screen', label: 'Pantalla del comedor', visible: can('access.display') },
-          { to: '/access/manual', label: 'Registro manual', visible: can('access.scan') },
-          { to: '/access/events', label: 'Registros de acceso', visible: can('access.view') },
-          { to: '/access/report', label: 'Reporte del comedor', visible: can('access.view') },
-        ],
+      links: [
+        { to: '/access/screen', label: 'Pantalla del comedor', visible: can('access.display') },
+        { to: '/access/manual', label: 'Registro manual', visible: can('access.scan') },
+        { to: '/access/events', label: 'Registros de acceso', visible: can('access.view') },
+        { to: '/access/report', label: 'Reporte del comedor', visible: can('access.view') },
+      ],
     },
     {
       title: 'Portería',
-        links: [
-          { to: '/cards/scan', label: 'Verificar carné (escanear)', visible: can('cards.scan') },
-          { to: '/parking/scan', label: 'Parqueo: ingreso y salida', visible: can('parking.scan') },
-          { to: '/parking/events', label: 'Movimientos del parqueo', visible: can('parking.view') },
-          { to: '/exits/scan', label: 'Salida con permiso (escanear)', visible: can('exits.scan') },
-          { to: '/visits', label: 'Visitas', visible: can('visits.view') },
+      links: [
+        { to: '/cards/scan', label: 'Verificar carné (escanear)', visible: can('cards.scan') },
+        { to: '/parking/scan', label: 'Parqueo: ingreso y salida', visible: can('parking.scan') },
+        { to: '/parking/events', label: 'Movimientos del parqueo', visible: can('parking.view') },
+        { to: '/exits/scan', label: 'Salida con permiso (escanear)', visible: can('exits.scan') },
+        { to: '/visits', label: 'Visitas', visible: can('visits.view') },
       ],
     },
-        {
+    {
       title: 'Vehículos',
       links: [{ to: '/vehicles/review', label: 'Revisión de vehículos', visible: can('vehicles.view') }],
     },
@@ -71,6 +77,11 @@ export function HomePage() {
         { to: '/access/points', label: 'Puntos de acceso y horarios', visible: can('access.manage') },
         { to: '/users', label: 'Cuentas y contraseñas', visible: can('users.manage') },
         { to: '/devices', label: 'Pantallas del comedor (dispositivos)', visible: can('users.manage') },
+        {
+          to: '/accessibility/students',
+          label: 'Pantalla de los estudiantes',
+          visible: can('accessibility.manage') && can('students.view'),
+        },
       ],
     },
   ]
@@ -115,22 +126,24 @@ export function HomePage() {
         </section>
       ))}
 
-      <section className="card" aria-labelledby="permissions-title">
-        <h2 id="permissions-title">Tus permisos</h2>
-        {user.permissions.length === 0 ? (
-          <p>No tienes permisos especiales.</p>
-        ) : (
-          <ul className="chips">
-            {user.permissions.map((permission) => (
-              <li key={permission}>
-                <code>{permission}</code>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      {!simple && (
+        <section className="card" aria-labelledby="permissions-title">
+          <h2 id="permissions-title">Tus permisos</h2>
+          {user.permissions.length === 0 ? (
+            <p>No tienes permisos especiales.</p>
+          ) : (
+            <ul className="chips">
+              {user.permissions.map((permission) => (
+                <li key={permission}>
+                  <code>{permission}</code>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
 
-      {institution && (
+      {!simple && institution && (
         <section className="card" aria-labelledby="modules-title">
           <h2 id="modules-title">Módulos de tu institución</h2>
           <ul>

@@ -436,3 +436,83 @@ select:focus-visible {
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
 }
+
+/* ---- Display preferences (see preferences/preferencesRules.ts) ---- */
+
+html {
+  font-size: calc(100% * var(--font-scale, 1));
+}
+
+input[type='range'] {
+  padding: 0;
+  accent-color: var(--color-primary);
+}
+
+:root[data-contrast='high'] {
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-text: #000000;
+  --color-text-muted: #1a1a1a;
+  --color-border: #000000;
+  --color-accent-soft: #e6e6e6;
+  --color-danger: #8a0000;
+  --color-danger-soft: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-contrast='high'] {
+    --color-bg: #000000;
+    --color-surface: #000000;
+    --color-text: #ffffff;
+    --color-text-muted: #f0f0f0;
+    --color-border: #ffffff;
+    --color-accent-soft: #1a1a1a;
+    --color-danger: #ff9e9e;
+    --color-danger-soft: #000000;
+  }
+}
+
+:root[data-contrast='high'] .card,
+:root[data-contrast='high'] input,
+:root[data-contrast='high'] select,
+:root[data-contrast='high'] button {
+  border-width: 2px;
+}
+
+:root[data-contrast='high'] a {
+  text-decoration: underline;
+}
+
+:root[data-motion='reduced'] *,
+:root[data-motion='reduced'] *::before,
+:root[data-motion='reduced'] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+:root[data-ui-mode='simple'] body {
+  font-size: 1.125rem;
+}
+
+:root[data-ui-mode='simple'] button {
+  min-height: 56px;
+  font-size: 1.125rem;
+}
+
+:root[data-ui-mode='simple'] .link-list a {
+  min-height: 56px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  font-size: 1.25rem;
+  text-decoration: none;
+}
+
+.read-aloud {
+  position: fixed;
+  right: var(--space-3);
+  bottom: var(--space-3);
+  z-index: 5;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.25);
+}
