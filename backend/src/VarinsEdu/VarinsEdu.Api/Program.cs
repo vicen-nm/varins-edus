@@ -17,6 +17,7 @@ using VarinsEdu.Infrastructure.Imports;
 using VarinsEdu.Infrastructure.Institutions;
 using VarinsEdu.Infrastructure.Parking;
 using VarinsEdu.Infrastructure.Persistence;
+using VarinsEdu.Infrastructure.Preferences;
 using VarinsEdu.Infrastructure.Security;
 using VarinsEdu.Infrastructure.Seeding;
 using VarinsEdu.Infrastructure.Students;
@@ -115,6 +116,7 @@ builder.Services.AddScoped<ParkingService>();
 builder.Services.AddScoped<ExitPermitService>();
 builder.Services.AddScoped<VisitService>();
 builder.Services.AddScoped<PublicVisitService>();
+builder.Services.AddScoped<PreferenceService>();
 
 // --- Seed data at startup ---
 builder.Services.AddSingleton(
