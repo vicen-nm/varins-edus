@@ -32,6 +32,8 @@ import { VisitsPage } from './pages/VisitsPage';
 import { AccessibilityStudentsPage } from './pages/AccessibilityStudentsPage';
 import { DisplayPage } from './pages/DisplayPage';
 import { ReadAloudButton } from './components/ReadAloudButton';
+import { AuditPage } from './pages/AuditPage';
+import { SummaryPage } from './pages/SummaryPage';
 
 export default function App() {
   return (
@@ -43,30 +45,32 @@ export default function App() {
         <Route path="/emparejar" element={<PairDevicePage />} />
         <Route path="/visitas/:slug" element={<VisitorFormPage />} />
         <Route element={<RequireAuth />}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/settings/branding" element={<BrandingPage />} />
-          <Route path="/students" element={<StudentsPage />} />
-          <Route path="/users" element={<UsersPage />} />
-          <Route path="/devices" element={<DevicesPage />} />
-          <Route path="/settings/password" element={<ChangePasswordPage />} />
-          <Route path="/students/import" element={<ImportStudentsPage />} />
-          <Route path="/card" element={<CardPage />} />
-          <Route path="/cards/scan" element={<CardScanPage />} />
-          <Route path="/access/points" element={<AccessPointsPage />} />
-          <Route path="/access/manual" element={<AccessManualPage />} />
-          <Route path="/access/screen" element={<CafeteriaScreenPage />} />
-          <Route path="/access/scan" element={<CafeteriaScanPage />} />
-          <Route path="/vehicles" element={<MyVehiclesPage />} />
-          <Route path="/vehicles/review" element={<VehiclesReviewPage />} />
-          <Route path="/parking/scan" element={<ParkingScanPage />} />
-          <Route path="/parking/events" element={<ParkingEventsPage />} />
-          <Route path="/exits" element={<ExitPermitsPage />} />
-          <Route path="/exits/scan" element={<ExitScanPage />} />
-          <Route path="/visits" element={<VisitsPage />} />
-          <Route path="/settings/display" element={<DisplayPage />} />
-          <Route path="/accessibility/students" element={<AccessibilityStudentsPage />} />
-          <Route path="/access/events" element={<AccessEventsPage />} />
-          <Route path="/access/report" element={<AccessReportPage />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/settings/branding" element={<BrandingPage />} />
+        <Route path="/students" element={<StudentsPage />} />
+        <Route path="/users" element={<UsersPage />} />
+        <Route path="/devices" element={<DevicesPage />} />
+        <Route path="/settings/password" element={<ChangePasswordPage />} />
+        <Route path="/students/import" element={<ImportStudentsPage />} />
+        <Route path="/card" element={<CardPage />} />
+        <Route path="/cards/scan" element={<CardScanPage />} />
+        <Route path="/access/points" element={<AccessPointsPage />} />
+        <Route path="/access/manual" element={<AccessManualPage />} />
+        <Route path="/access/screen" element={<CafeteriaScreenPage />} />
+        <Route path="/access/scan" element={<CafeteriaScanPage />} />
+        <Route path="/vehicles" element={<MyVehiclesPage />} />
+        <Route path="/vehicles/review" element={<VehiclesReviewPage />} />
+        <Route path="/parking/scan" element={<ParkingScanPage />} />
+        <Route path="/parking/events" element={<ParkingEventsPage />} />
+        <Route path="/exits" element={<ExitPermitsPage />} />
+        <Route path="/exits/scan" element={<ExitScanPage />} />
+        <Route path="/visits" element={<VisitsPage />} />
+        <Route path="/settings/display" element={<DisplayPage />} />
+        <Route path="/accessibility/students" element={<AccessibilityStudentsPage />} />
+        <Route path="/summary" element={<SummaryPage />} />
+        <Route path="/audit" element={<AuditPage />} />
+        <Route path="/access/events" element={<AccessEventsPage />} />
+        <Route path="/access/report" element={<AccessReportPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

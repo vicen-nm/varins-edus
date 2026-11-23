@@ -29,6 +29,23 @@ export function HomePage() {
   const can = (permission: string) => inInstitution && user.permissions.includes(permission);
 
   const sections: { title: string; links: NavLink[] }[] = [
+        {
+      title: 'Resumen',
+      links: [
+        {
+          to: '/summary',
+          label: 'Resumen del día',
+          visible:
+            can('access.view') ||
+            can('parking.view') ||
+            can('visits.view') ||
+            can('exits.manage') ||
+            can('vehicles.view') ||
+            can('students.view') ||
+            can('audit.view'),
+        },
+      ],
+    },
     {
       title: 'Mi cuenta',
       links: [
@@ -77,6 +94,7 @@ export function HomePage() {
         { to: '/access/points', label: 'Puntos de acceso y horarios', visible: can('access.manage') },
         { to: '/users', label: 'Cuentas y contraseñas', visible: can('users.manage') },
         { to: '/devices', label: 'Pantallas del comedor (dispositivos)', visible: can('users.manage') },
+        { to: '/audit', label: 'Bitácora', visible: can('audit.view') },
         {
           to: '/accessibility/students',
           label: 'Pantalla de los estudiantes',

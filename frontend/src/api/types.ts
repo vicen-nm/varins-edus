@@ -361,3 +361,37 @@ export type DisplayPreferences = {
   highContrast: boolean;
   reducedMotion: boolean;
 };
+
+export type ServiceCount = { service: string; total: number };
+
+export type DailySummary = {
+  date: string;
+  access: { total: number; qr: number; manual: number; byService: ServiceCount[] } | null;
+  parking: { inside: number; entriesToday: number; exitsToday: number; withoutExit: number } | null;
+  visits: { total: number; pending: number; inside: number } | null;
+  exits: { total: number; valid: number; used: number } | null;
+  vehicles: { pending: number; approved: number; suspended: number } | null;
+  students: { active: number; withAccount: number; withoutAccount: number } | null;
+  security: {
+    failedLogins: number;
+    lockedAccounts: number;
+    cardReuse: number;
+    sessionReuse: number;
+  } | null;
+};
+
+export type AuditItem = {
+  id: number;
+  action: string;
+  entityType: string;
+  entityId: string | null;
+  username: string | null;
+  occurredAt: string;
+  ipAddress: string | null;
+  metadata: unknown;
+};
+
+export type AuditPage = {
+  total: number;
+  items: AuditItem[];
+};
