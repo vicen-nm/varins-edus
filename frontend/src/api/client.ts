@@ -1,4 +1,5 @@
-import { saveSession, storedToken } from '../auth/session';
+import { saveSession, storedToken, storedUserId } from '../auth/session';
+import { canAcceptRenewal } from '../auth/sessionRules';
 import type { LoginResponse } from './types';
 
 // Empty means "same origin", which is what we use in production and in development (Vite proxy).
@@ -10,6 +11,9 @@ export const UNAUTHORIZED_EVENT = 'varinsedu:unauthorized';
 
 // Fired when the session was renewed, so the app can use the new token.
 export const SESSION_RENEWED_EVENT = 'varinsedu:session-renewed';
+
+// Fired when somebody else signed in from another tab of this browser: this tab only drops its own session.
+export const SESSION_REPLACED_EVENT = 'varinsedu:session-replaced';
 
 export class ApiError extends Error {
   status: number;
@@ -47,7 +51,9 @@ async function toApiError(response: Response): Promise<ApiError> {
 }
 
 // "ended": the server refused the cookie. "network": a transient problem, so the session is kept.
-export type RenewResult = { ok: true; session: LoginResponse } | { ok: false; reason: 'ended' | 'network' };
+export type RenewResult =
+  | { ok: true; session: LoginResponse }
+  | { ok: false; reason: 'ended' | 'network' | 'other_user' };
 
 const RENEW_LOCK = 'varinsedu-renew';
 const CONFLICT_RETRY_MS = 1000;
@@ -73,6 +79,11 @@ async function renewOnce(): Promise<RenewResult> {
     if (response.ok) {
       try {
         const session = (await response.json()) as LoginResponse;
+
+        // The cookie is one per browser: it may belong to somebody who signed in from another tab.
+        if (!canAcceptRenewal(storedUserId(), session.user.userId)) {
+          return { ok: false, reason: 'other_user' };
+        }
 
         saveSession(session);
         window.dispatchEvent(new CustomEvent<LoginResponse>(SESSION_RENEWED_EVENT, { detail: session }));
@@ -161,7 +172,8 @@ async function sendWithRenewal(path: string, init: RequestInit, accept: string):
     throw new ApiError(0, 'network_error', 'Could not reach the server.');
   }
 
-  window.dispatchEvent(new Event(UNAUTHORIZED_EVENT));
+    // Somebody else signed in from another tab: this tab drops its own session and does not touch theirs.
+  window.dispatchEvent(new Event(renewed.reason === 'other_user' ? SESSION_REPLACED_EVENT : UNAUTHORIZED_EVENT));
 
   return first.response;
 }

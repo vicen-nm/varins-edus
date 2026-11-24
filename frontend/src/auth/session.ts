@@ -42,3 +42,15 @@ export function storedToken(): string | null {
     return null;
   }
 }
+
+
+// The user of the session kept in this tab, even if its token already expired.
+export function storedUserId(): string | null {
+  try {
+    const raw = sessionStorage.getItem(KEY);
+
+    return raw ? (JSON.parse(raw) as LoginResponse).user.userId : null;
+  } catch {
+    return null;
+  }
+}

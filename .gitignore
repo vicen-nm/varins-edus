@@ -39,3 +39,6 @@ pgdata/
 # Local test files
 backend/*.xlsx
 backend/mapping.json
+
+# Local copy of the demo database
+demo.dump
