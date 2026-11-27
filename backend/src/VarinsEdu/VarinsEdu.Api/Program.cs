@@ -27,12 +27,23 @@ using VarinsEdu.Infrastructure.Visits;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Production refuses to start with incomplete configuration instead of failing later in odd ways.
+if (builder.Environment.IsProduction())
+{
+    var configProblems = ProductionConfigCheck.FindProblems(builder.Configuration);
+    if (configProblems.Count > 0)
+    {
+        throw new InvalidOperationException("Invalid production configuration: " + string.Join(" ", configProblems));
+    }
+}
+
 // --- Web API basics ---
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddFrontendCors(builder.Configuration);
+builder.Services.AddProxyHeaders(builder.Configuration);
 builder.Services.AddAppHealthChecks();
 
 // --- Who is calling (read from the token) ---
@@ -135,6 +146,12 @@ if (builder.Environment.IsDevelopment() && builder.Configuration.GetValue<bool>(
 var app = builder.Build();
 
 // The error handler goes first so it can catch whatever happens further down the pipeline.
+// First of all, so everything below sees the real client IP and scheme behind the proxy.
+if (ForwardedHeadersSetup.ReadNetworks(builder.Configuration).Length > 0)
+{
+    app.UseForwardedHeaders();
+}
+
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 
