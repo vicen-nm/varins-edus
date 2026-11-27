@@ -125,6 +125,13 @@ builder.Services.AddScoped<AuditQueryService>();
 builder.Services.AddSingleton(
     builder.Configuration.GetSection(SeedOptions.SectionName).Get<SeedOptions>() ?? new SeedOptions());
 
+// --- Demo data: development only, and only when asked for ---
+if (builder.Environment.IsDevelopment() && builder.Configuration.GetValue<bool>("Demo:Enabled"))
+{
+    builder.Services.AddScoped<DemoDataSeeder>();
+    builder.Services.AddHostedService<DemoDataHostedService>();
+}
+
 var app = builder.Build();
 
 // The error handler goes first so it can catch whatever happens further down the pipeline.

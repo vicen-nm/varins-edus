@@ -6,6 +6,7 @@ import {
   apiFetch,
   renewSession,
   serverLogout,
+  SESSION_REPLACED_EVENT,
 } from '../api/client';
 import type { LoginResponse } from '../api/types';
 import { AuthContext } from './authContext';
@@ -24,6 +25,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     void serverLogout();
+    clearSession();
+    setSession(null);
+  }, []);
+
+  
+  // Somebody else signed in from another tab of this browser: this tab only drops its own session.
+  // It must NOT call the server: the renewal cookie now belongs to that other person.
+  const dropSession = useCallback(() => {
     clearSession();
     setSession(null);
   }, []);
@@ -72,17 +81,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
   
   // The session was renewed (here or by a request), or it cannot be renewed any more.
-  useEffect(() => {
+    useEffect(() => {
     const handleRenewed = (event: Event) => setSession((event as CustomEvent<LoginResponse>).detail);
 
     window.addEventListener(SESSION_RENEWED_EVENT, handleRenewed);
     window.addEventListener(UNAUTHORIZED_EVENT, logout);
+    window.addEventListener(SESSION_REPLACED_EVENT, dropSession);
 
     return () => {
       window.removeEventListener(SESSION_RENEWED_EVENT, handleRenewed);
       window.removeEventListener(UNAUTHORIZED_EVENT, logout);
+      window.removeEventListener(SESSION_REPLACED_EVENT, dropSession);
     };
-  }, [logout]);
+  }, [logout, dropSession]);
 
   // First load without a session in this tab: restore it from the cookie, if there is one.
   useEffect(() => {
@@ -126,8 +137,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      if (result.reason === 'ended') {
+            if (result.reason === 'ended') {
         logout();
+      } else if (result.reason === 'other_user') {
+        dropSession();
       } else {
         timer = window.setTimeout(renew, RETRY_AFTER_NETWORK_ERROR_MS);
       }
@@ -150,7 +163,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       window.clearTimeout(timer);
       document.removeEventListener('visibilitychange', handleVisibility);
     };
-  }, [session, logout]);
+  }, [session, logout, dropSession]);
 
   const value = useMemo<AuthContextValue>(
     () => ({ user: session?.user ?? null, ready, login, activate, pairDevice, logout }),
