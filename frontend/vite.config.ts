@@ -48,16 +48,19 @@ export default defineConfig({
       },
     }),
   ],
-  server: {
+    server: {
     port: 5173,
     strictPort: true,
     proxy: apiProxy,
+    // Lets a temporary Cloudflare tunnel (https://something.trycloudflare.com) reach the dev server.
+    allowedHosts: ['.trycloudflare.com'],
   },
   // Same port as the dev server.
-  preview: {
+    preview: {
     port: 5173,
     strictPort: true,
     proxy: apiProxy,
+    allowedHosts: ['.trycloudflare.com'],
   },
   test: {
     include: ['src/**/*.test.ts'],
